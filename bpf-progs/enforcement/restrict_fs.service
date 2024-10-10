@@ -1,0 +1,9 @@
+[Unit]
+Description=Restrict File System
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=output/restrictfsFinal
+ExecStop=rm /sys/fs/bpf/*
+LimitMEMLOCK=infinity

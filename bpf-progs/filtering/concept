@@ -1,0 +1,34 @@
+(1) Using bpftool to push ip into already pinned bpf map, which got created using filterIp.kern.o program
+
+    ping -I enxde126e16311e 8.8.8.8
+    sudo cat /sys/kernel/debug/tracing/trace_pipe
+
+
+    sudo tc qdisc add dev enp0s31f6 clsact
+        ( tc qdisc add dev eth0 clsact )
+
+    sudo tc filter add dev enp0s31f6 ingress bpf da obj ./filterIp.kern.o sec tc/ingress
+        (tc filter add dev eth0 ingress bpf da obj ./filterIp.kern.o sec tc/ingress)
+
+    sudo bpftool map update pinned /sys/fs/bpf/xdp/globals/my_map key 00 00 00 00 value 0x08 0x08 0x08 0x08
+
+    sudo rm -rf /sys/fs/bpf/xdp/globals/my_map
+    sudo rm -rf /sys/fs/bpf/prog
+    sudo tc qdisc delete dev enxde126e16311e clsact
+
+    sudo bpftool prog show
+    sudo bpftool map show
+
+    upgautamvt@upg-vt-lab:~$ sudo ls /sys/fs/bpf/xdp/globals
+    my_map
+    upgautamvt@upg-vt-lab:~$ sudo bpftool map update pinned /sys/fs/bpf/xdp/globals/my_map key 00 00 00 00 value 08 08 08 08
+    upgautamvt@upg-vt-lab:~$ sudo bpftool prog show | grep prog
+    209: sched_cls  name prog  tag c430e258fb920dca  gpl
+    upgautamvt@upg-vt-lab:~$ sudo bpftool map show | grep my_map
+    64: array  name my_map  flags 0x
+
+(2) Use user-space C program to push ip value to already pinned bpf map
+
+
+Notes:
+to create map using bpftool: bpftool map create /sys/fs/bpf/my_map type array key 4 value 4 entries 2 name my_map

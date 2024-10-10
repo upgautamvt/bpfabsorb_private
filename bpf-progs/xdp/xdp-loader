@@ -1,0 +1,67 @@
+To load xdp bpf program: sudo xdp-loader load ens3 XdpProg_PacketsMemaslap.kern.o --section xdp
+Check attached program using: bpftool prog show
+To unload: xdp-loader unload eth0 (or xdp-loader unload -a eth0)
+
+Since xdp program we attach with eth0, we need to guarantee our packet goes through eth0
+    (this is default as confirmed in ip route)
+
+Run nginx: #    nginx -g 'daemon off;' and from another ssh-session
+ (sudo make qemu-ssh do curl -I http://localhost:80
+Then to nginx macro benchmark as: wrk -t6 -c200 -d30s http://10.0.2.15:80/index.html
+
+to unload:  sudo xdp-loader unload -a ens3
+
+
+cat /sys/kernel/debug/tracing/trace
+
+
+I developed a python script that basically runs wrk X times and then generates both throughput and latency graph
+Then I used rclone to upload generated graph into my google drive folder.
+
+Result (increased throughput and lower latency in vanilla kernel)
+
+root@q:/kernelwithbpfprograms-kernel/bpf-progs/xdp# bpftool prog show
+14: xdp  name xdp_dispatcher  tag 4d7e87c0d30db711  gpl
+        loaded_at 2024-07-11T19:11:23+0000  uid 0
+        xlated 184B  jited 147B  memlock 4096B  map_ids 5
+        btf_id 12
+23: ext  name xdp_prog  tag 89e003e39b8fbb1f  gpl
+        loaded_at 2024-07-11T19:11:23+0000  uid 0
+        xlated 232B  jited 155B  memlock 4096B
+        btf_id 15
+root@q:/kernelwithbpfprograms-kernel/bpf-progs/xdp# wrk -t6 -c200 -d30s http://10.0.2.15:80/index.html
+Running 30s test @ http://10.0.2.15:80/index.html
+  6 threads and 200 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    46.65ms   94.32ms   2.00s    98.64%
+    Req/Sec     0.87k   184.52     2.92k    83.13%
+  152980 requests in 30.02s, 124.45MB read
+  Socket errors: connect 0, read 0, write 0, timeout 54
+Requests/sec:   5095.97
+Transfer/sec:      4.15MB
+root@q:/kernelwithbpfprograms-kernel/bpf-progs/xdp# xdp-loader unload -a eth0
+root@q:/kernelwithbpfprograms-kernel/bpf-progs/xdp# bpftool prog show
+root@q:/kernelwithbpfprograms-kernel/bpf-progs/xdp# wrk -t6 -c200 -d30s http://10.0.2.15:80/index.html
+Running 30s test @ http://10.0.2.15:80/index.html
+  6 threads and 200 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    45.83ms   91.69ms   1.99s    98.71%
+    Req/Sec     0.87k   202.21     3.27k    89.93%
+  154059 requests in 30.01s, 125.33MB read
+  Socket errors: connect 0, read 0, write 0, timeout 56
+Requests/sec:   5132.78
+Transfer/sec:      4.18MB
+
+
+Let's do 1 thread 1 connection run for 60 seconds.
+
+root@q:/kernelwithbpfprograms-kernel/bpf-progs/xdp# wrk -t1 -c1 -d30s http://10.0.2.15:80/index.html
+Running 30s test @ http://10.0.2.15:80/index.html
+  6 threads and 200 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    45.83ms   91.69ms   1.99s    98.71%
+    Req/Sec     0.87k   202.21     3.27k    89.93%
+  154059 requests in 30.01s, 125.33MB read
+  Socket errors: connect 0, read 0, write 0, timeout 56
+Requests/sec:   5132.78
+Transfer/sec:      4.18MB

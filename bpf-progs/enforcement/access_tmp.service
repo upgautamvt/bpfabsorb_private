@@ -1,0 +1,9 @@
+[Unit]
+Description=Access tmp filesystem
+Requires=restrict_fs.service
+After=restrict_fs.service
+
+[Service]
+[Service]
+ExecStart=cat /tmp/myfile
+RestrictFileSystems=ext4 tmpfs
