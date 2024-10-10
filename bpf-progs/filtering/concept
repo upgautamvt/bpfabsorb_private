@@ -11,6 +11,7 @@
         (tc filter add dev eth0 ingress bpf da obj ./filterIp.kern.o sec tc/ingress)
 
     sudo bpftool map update pinned /sys/fs/bpf/xdp/globals/my_map key 00 00 00 00 value 0x08 0x08 0x08 0x08
+        (or run your user-space program that updates map)
 
     sudo rm -rf /sys/fs/bpf/xdp/globals/my_map
     sudo rm -rf /sys/fs/bpf/prog
