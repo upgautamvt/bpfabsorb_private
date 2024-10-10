@@ -35,7 +35,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
     libstdc++-12-dev \
     libstdc++-13-dev \
     libstdc++-14-dev \
-    bc inetutils-ping \
+    bc fping \
     xterm \
     trace-cmd \
     tcpdump \

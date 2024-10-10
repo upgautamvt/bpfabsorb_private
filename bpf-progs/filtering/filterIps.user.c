@@ -7,13 +7,17 @@
 #include <unistd.h>
 
 // Path to your BPF map (mounted with bpffs)
-//this map gets created by bpf kernel program there you have to use __uint(pinning, LIBBPF_PIN_BY_NAME)
 #define MAP_PATH "/sys/fs/bpf/xdp/globals/my_map"
-#define MAX_ENTRIES 256 // Maximum number of entries in the map
+#define MAX_ENTRIES 2 // Maximum number of entries in the map
 #define MAP_NAME "my_map" // Name of the BPF map
 
-int main() {
-    //update 8.8.8.8 value so that it is alternative of "sudo bpftool map update pinned /sys/fs/bpf/xdp/globals/my_map key 00 00 00 00 value 0x08 0x08 0x08 0x08"
+int main(int argc, char *argv[]) {
+    // Check for the correct number of arguments
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <IP_ADDRESS>\n", argv[0]);
+        return 1;
+    }
+
     // Open the BPF map
     int map_fd = bpf_obj_get(MAP_PATH);
     if (map_fd < 0) {
@@ -25,8 +29,12 @@ int main() {
     __u32 key = 0; // Using 0 as the key, adjust as necessary
     __be32 value;
 
-    // Convert the IP address 8.8.8.8 to network byte order
-    value = htonl(0x08080808); // 8.8.8.8 in hexadecimal is 0x08080808
+    // Convert the IP address from string to network byte order
+    if (inet_pton(AF_INET, argv[1], &value) != 1) {
+        perror("Invalid IP address");
+        close(map_fd);
+        return errno;
+    }
 
     // Update the map with the key and value
     if (bpf_map_update_elem(map_fd, &key, &value, BPF_ANY) < 0) {
@@ -35,10 +43,9 @@ int main() {
         return errno;
     }
 
-    printf("Successfully updated the BPF map with IP 8.8.8.8\n");
+    printf("Successfully updated the BPF map with IP %s\n", argv[1]);
 
     // Close the map file descriptor
     close(map_fd);
     return 0;
 }
-

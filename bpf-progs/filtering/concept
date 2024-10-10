@@ -1,6 +1,7 @@
 (1) Using bpftool to push ip into already pinned bpf map, which got created using filterIp.kern.o program
 
-    ping -I enxde126e16311e 8.8.8.8
+    fping -I eth0 -c 1 8.8.8.8
+    fping -I eth0 -c 1 75.75.75.75
     sudo cat /sys/kernel/debug/tracing/trace_pipe
 
 
@@ -8,14 +9,12 @@
         ( tc qdisc add dev eth0 clsact )
 
     sudo tc filter add dev enp0s31f6 ingress bpf da obj ./filterIp.kern.o sec tc/ingress
-        (tc filter add dev eth0 ingress bpf da obj ./filterIp.kern.o sec tc/ingress)
+        ( tc filter add dev eth0 ingress bpf da obj ./filterIp.kern.o sec tc/ingress )
 
     sudo bpftool map update pinned /sys/fs/bpf/xdp/globals/my_map key 00 00 00 00 value 0x08 0x08 0x08 0x08
         (or run your user-space program that updates map)
 
-    sudo rm -rf /sys/fs/bpf/xdp/globals/my_map
-    sudo rm -rf /sys/fs/bpf/prog
-    sudo tc qdisc delete dev enxde126e16311e clsact
+        cat /sys/kernel/debug/tracing/trace_pipe
 
     sudo bpftool prog show
     sudo bpftool map show
@@ -33,3 +32,24 @@
 
 Notes:
 to create map using bpftool: bpftool map create /sys/fs/bpf/my_map type array key 4 value 4 entries 2 name my_map
+
+QEMU Testing:
+
+tc qdisc add dev eth0 clsact
+tc filter add dev eth0 ingress bpf da obj ./filterIp.kern.o sec tc/ingress
+bpftool map update pinned /sys/fs/bpf/xdp/globals/my_map key 00 00 00 00 value 0xAC 0x11 0x00 0x01
+                (AC=172, this is 172.17.0.1)
+
+bpftool map update pinned /sys/fs/bpf/xdp/globals/my_map key 00 00 00 00 value 0x08 0x08 0x08 0x08
+
+cat /sys/kernel/debug/tracing/trace_pipe
+
+
+fping -I eth0 -c 4 8.8.8.8
+fping -I eth0 -c 4 172.17.0.1
+fping -I eth0 -c 4 75.75.75.75
+
+
+rm -rf /sys/fs/bpf/xdp/globals/my_map
+rm -rf /sys/fs/bpf/prog
+tc qdisc del dev eth0 clsact
