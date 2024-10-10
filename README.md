@@ -551,7 +551,7 @@ cd -
 # To remote gdb to QEMU (in host machine)
 We have added docker to qemu port mapping
 ```c
-DOCKER_PORT ?= "11234"
+DOCKER_PORT ?= "1234"
 -p 127.0.0.1:${DOCKER_PORT}:1234
 ```
 
@@ -562,7 +562,7 @@ cd linux
 objcopy --only-keep-debug vmlinux kernel.sym
 gdb
     (gdb) file ./kernel.sym
-    (gdb) target remote localhost:11234 //11234 is our DOCKER_PORT
+    (gdb) target remote localhost:1234 //1234 is our DOCKER_PORT
     (gdb) hbreak trace_call_bpf //this is the function which kprobe handler and tracepoint system use to dispatch bpf programs
     (gdb) c
 

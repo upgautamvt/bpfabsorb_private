@@ -37,6 +37,8 @@ QEMU Testing:
 
 tc qdisc add dev eth0 clsact
 tc filter add dev eth0 ingress bpf da obj ./filterIp.kern.o sec tc/ingress
+./filterIps.user 172.17.0.1
+
 bpftool map update pinned /sys/fs/bpf/xdp/globals/my_map key 00 00 00 00 value 0xAC 0x11 0x00 0x01
                 (AC=172, this is 172.17.0.1)
 
@@ -53,3 +55,40 @@ fping -I eth0 -c 4 75.75.75.75
 rm -rf /sys/fs/bpf/xdp/globals/my_map
 rm -rf /sys/fs/bpf/prog
 tc qdisc del dev eth0 clsact
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+sudo tc qdisc add dev enx0a37757e295e clsact
+sudo tc filter add dev enx0a37757e295e ingress bpf da obj ./filterIp.kern.o sec tc/ingress
+sudo ./filterIps.user 8.8.8.8
+
+sudo cat /sys/kernel/debug/tracing/trace_pipe
+
+
+fping -I enx0a37757e295e -c 4 8.8.8.8
+fping -I enx0a37757e295e -c 4 75.75.75.75
+
+
+sudo rm -rf /sys/fs/bpf/xdp/globals/my_map
+sudo rm -rf /sys/fs/bpf/prog
+sudo tc qdisc del dev enx0a37757e295e clsact
+
+
+
