@@ -4,7 +4,8 @@
 char LISENSE[] SEC("license") = "Dual BSD/GPL";
 
 SEC("tp/syscalls/sys_enter_getcwd")
-int empty(void *ctx)
+int prog(void *ctx)
 {
+    bpf_printk("Empty output\n");
     return 0;
 }

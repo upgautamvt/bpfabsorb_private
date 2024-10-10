@@ -4,7 +4,8 @@
 char LISENSE[] SEC("license") = "Dual BSD/GPL";
 
 SEC("tp/syscalls/sys_enter_getcwd")
-int bpf_demo(void *ctx)
+int prog(void *ctx)
 {
+    bpf_printk("Demo output\n");
     return 0;
 }

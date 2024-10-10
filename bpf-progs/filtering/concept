@@ -75,20 +75,222 @@ tc qdisc del dev eth0 clsact
 
 
 
-sudo tc qdisc add dev enx0a37757e295e clsact
-sudo tc filter add dev enx0a37757e295e ingress bpf da obj ./filterIp.kern.o sec tc/ingress
-sudo ./filterIps.user 8.8.8.8
+tc qdisc add dev eth0 clsact
+tc filter add dev eth0 ingress bpf da obj ./filterIphardcoded.kern.o sec tc/ingress
+./filterIps.user 8.8.8.8
 
-sudo cat /sys/kernel/debug/tracing/trace_pipe
-
-
-fping -I enx0a37757e295e -c 4 8.8.8.8
-fping -I enx0a37757e295e -c 4 75.75.75.75
+cat /sys/kernel/debug/tracing/trace_pipe
 
 
-sudo rm -rf /sys/fs/bpf/xdp/globals/my_map
-sudo rm -rf /sys/fs/bpf/prog
-sudo tc qdisc del dev enx0a37757e295e clsact
+fping -I eth0 -c 1 8.8.8.8
+fping -I eth0 -c 4 75.75.75.75
+
+
+rm -rf /sys/fs/bpf/xdp/globals/my_map
+rm -rf /sys/fs/bpf/prog
+tc qdisc del dev eth0 clsact
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+http://oldvger.kernel.org/~davem/skb.html
+https://blog.cloudflare.com/assembly-within-bpf-tail-calls-on-x86-and-arm/
+
+
+Idea (load the bpf program)
+    root@q:/bpfabsorb/bpf-progs/filtering# tail /proc/kallsyms
+    ffffffff84200000 B __bss_stop
+    ffffffff84200000 B __end_bss_decrypted
+    ffffffff84200000 B __end_of_kernel_reserve
+    ffffffff84200000 B __start_bss_decrypted
+    ffffffff84200000 B __start_bss_decrypted_unused
+    ffffffff84210000 b __brk_dmi_alloc
+    ffffffff84220000 b __brk_early_pgt_alloc
+    ffffffff84228000 B _end
+    ffffffff84228000 B __brk_limit
+    ffffffffa0000794 t bpf_prog_9e169b15281a1784_prog	[bpf]
+
+
+    ffffffffa0000794 is the address where you should put breakpoint in gdb
+    b 0Xffffffffa0000794
+
+
+    upgautamvt@upg-vt-lab:~/CLionProjects/bpfabsorb/linux$ gdb vmlinux
+    GNU gdb (Ubuntu 15.0.50.20240403-0ubuntu1) 15.0.50.20240403-git
+    Copyright (C) 2024 Free Software Foundation, Inc.
+    License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+    This is free software: you are free to change and redistribute it.
+    There is NO WARRANTY, to the extent permitted by law.
+    Type "show copying" and "show warranty" for details.
+    This GDB was configured as "x86_64-linux-gnu".
+    Type "show configuration" for configuration details.
+    For bug reporting instructions, please see:
+    <https://www.gnu.org/software/gdb/bugs/>.
+    Find the GDB manual and other documentation resources online at:
+        <http://www.gnu.org/software/gdb/documentation/>.
+
+    For help, type "help".
+    Type "apropos word" to search for commands related to "word"...
+    Reading symbols from vmlinux...
+    (gdb)
+    (gdb)
+    (gdb)
+    (gdb)
+    (gdb) target remote:1234
+    Remote debugging using :1234
+    native_irq_disable () at ./arch/x86/include/asm/irqflags.h:37
+    37		asm volatile("cli": : :"memory");
+    (gdb) c
+    Continuing.
+    ^C
+    Thread 4 received signal SIGINT, Interrupt.
+    [Switching to Thread 1.4]
+    default_idle () at arch/x86/kernel/process.c:743
+    743		raw_local_irq_disable();
+    (gdb) b *0xffffffffa0000794
+    Breakpoint 1 at 0xffffffffa0000794
+    (gdb) c
+    Continuing.
+    (gdb) c
+    [Switching to Thread 1.2]
+
+    Thread 2 hit Breakpoint 1, 0xffffffffa0000794 in ?? ()
+    (gdb) c
+    Continuing.
+
+    Thread 2 hit Breakpoint 1, 0xffffffffa0000794 in ?? ()
+    (gdb) bt
+    #0  0xffffffffa0000794 in ?? ()
+    #1  0xffffffff81ccf8c2 in bpf_dispatcher_nop_func (bpf_func=0xffffffffa0000794, insnsi=0xffffc90000135048, ctx=0xffff88800661e100)
+        at ./include/linux/bpf.h:1243
+    #2  __bpf_prog_run (dfunc=<optimized out>, ctx=0xffff88800661e100, prog=0xffffc90000135000) at ./include/linux/filter.h:691
+    #3  bpf_prog_run (ctx=0xffff88800661e100, prog=0xffffc90000135000) at ./include/linux/filter.h:698
+    #4  cls_bpf_classify (skb=0xffff88800661e100, tp=<optimized out>, res=0xffffc900000f0b60) at net/sched/cls_bpf.c:101
+    #5  0xffffffff81cb9580 in tc_classify (res=<optimized out>, tp=0xffff8880051aaa80, skb=<optimized out>) at ./include/net/tc_wrapper.h:197
+    #6  __tcf_classify (skb=skb@entry=0xffff88800661e100, tp=0xffff8880051aaa80, orig_tp=0xffff8880051aaa80, res=res@entry=0xffffc900000f0b60,
+        compat_mode=compat_mode@entry=false, last_executed_chain=last_executed_chain@entry=0xffffc900000f0b4c, act_index=0,
+        n=0x0 <fixed_percpu_data>) at net/sched/cls_api.c:1770
+    #7  0xffffffff81cb9839 in tcf_classify (skb=skb@entry=0xffff88800661e100, block=<optimized out>, tp=<optimized out>,
+        res=res@entry=0xffffc900000f0b60, compat_mode=compat_mode@entry=false) at net/sched/cls_api.c:1819
+    #8  0xffffffff81c42e84 in tc_run (entry=<optimized out>, skb=skb@entry=0xffff88800661e100, drop_reason=drop_reason@entry=0xffffc900000f0be0)
+        at net/core/dev.c:3993
+    #9  0xffffffff81c4dfed in sch_handle_ingress (another=<synthetic pointer>,
+        orig_dev=<error reading variable: Cannot access memory at address 0x0>, ret=<synthetic pointer>, pt_prev=<synthetic pointer>,
+        skb=<optimized out>) at net/core/dev.c:4068
+    #10 __netif_receive_skb_core (pskb=pskb@entry=0xffffc900000f0cd8, pfmemalloc=pfmemalloc@entry=false, ppt_prev=ppt_prev@entry=0xffffc900000f0ce0)
+        at net/core/dev.c:5521
+    #11 0xffffffff81c4ed17 in __netif_receive_skb_list_core (head=head@entry=0xffff888005d97110, pfmemalloc=pfmemalloc@entry=false)
+        at net/core/dev.c:5737
+    #12 0xffffffff81c4f419 in __netif_receive_skb_list (head=0xffff888005d97110) at net/core/dev.c:5804
+    #13 netif_receive_skb_list_internal (head=head@entry=0xffff888005d97110) at net/core/dev.c:5896
+    #14 0xffffffff81c4fcdd in gro_normal_list (napi=0xffff888005d97008) at ./include/net/gro.h:515
+    #15 gro_normal_list (napi=0xffff888005d97008) at ./include/net/gro.h:511
+    #16 napi_complete_done (n=n@entry=0xffff888005d97008, work_done=work_done@entry=1) at net/core/dev.c:6247
+    #17 0xffffffff81a34a34 in virtqueue_napi_complete (processed=1, vq=0xffff888005bd6a00, napi=0xffff888005d97008) at drivers/net/virtio_net.c:697
+    #18 virtnet_poll (napi=0xffff888005d97008, budget=<optimized out>) at drivers/net/virtio_net.c:2825
+    #19 0xffffffff81c4fe93 in __napi_poll (n=0xffff88800661e100, n@entry=0xffff888005d97008, repoll=repoll@entry=0xffffc900000f0ecf)
+        at net/core/dev.c:6772
+    #20 0xffffffff81c50623 in napi_poll (repoll=0xffffc900000f0ee0, n=0xffff888005d97008) at net/core/dev.c:6841
+    #21 net_rx_action (h=<optimized out>) at net/core/dev.c:6963
+    #22 0xffffffff810971d5 in handle_softirqs (ksirqd=ksirqd@entry=false) at kernel/softirq.c:554
+    #23 0xffffffff81097c12 in __do_softirq () at kernel/softirq.c:588
+    #24 invoke_softirq () at kernel/softirq.c:428
+    #25 __irq_exit_rcu () at kernel/softirq.c:637
+    #26 irq_exit_rcu () at kernel/softirq.c:649
+    #27 0xffffffff8201d3cd in common_interrupt (regs=0xffffc900000abe38, error_code=<optimized out>) at arch/x86/kernel/irq.c:278
+    Backtrace stopped: Cannot access memory at address 0xffffc900000f1010
+    (gdb)
+
+
+From above, we can see
+     #3  bpf_prog_run (ctx=0xffff88800661e100, prog=0xffffc90000135000) at ./include/linux/filter.h:698
+     #4  cls_bpf_classify (skb=0xffff88800661e100, tp=<optimized out>, res=0xffffc900000f0b60) at net/sched/cls_bpf.c:101
+
+
+TC_INDIRECT_SCOPE int cls_bpf_classify(struct sk_buff *skb,
+				       const struct tcf_proto *tp,
+				       struct tcf_result *res)
+{
+	struct cls_bpf_head *head = rcu_dereference_bh(tp->root);
+	bool at_ingress = skb_at_tc_ingress(skb);
+	struct cls_bpf_prog *prog;
+	int ret = -1;
+
+	list_for_each_entry_rcu(prog, &head->plist, link) {
+		int filter_res;
+
+		qdisc_skb_cb(skb)->tc_classid = prog->res.classid;
+
+		if (tc_skip_sw(prog->gen_flags)) {
+			filter_res = prog->exts_integrated ? TC_ACT_UNSPEC : 0;
+		} else if (at_ingress) {
+			/* It is safe to push/pull even if skb_shared() */
+			__skb_push(skb, skb->mac_len);
+			bpf_compute_data_pointers(skb);
+			filter_res = bpf_prog_run(prog->filter, skb);
+			__skb_pull(skb, skb->mac_len);
+		} else {
+			bpf_compute_data_pointers(skb);
+			filter_res = bpf_prog_run(prog->filter, skb);
+		}
+		if (unlikely(!skb->tstamp && skb->tstamp_type))
+			skb->tstamp_type = SKB_CLOCK_REALTIME;
+
+		if (prog->exts_integrated) {
+			res->class   = 0;
+			res->classid = TC_H_MAJ(prog->res.classid) |
+				       qdisc_skb_cb(skb)->tc_classid;
+
+			ret = cls_bpf_exec_opcode(filter_res);
+			if (ret == TC_ACT_UNSPEC)
+				continue;
+			break;
+		}
+
+		if (filter_res == 0)
+			continue;
+		if (filter_res != -1) {
+			res->class   = 0;
+			res->classid = filter_res;
+		} else {
+			*res = prog->res;
+		}
+
+		ret = tcf_exts_exec(skb, &prog->exts, res);
+		if (ret < 0)
+			continue;
+
+		break;
+	}
+
+	return ret;
+}
+
+
+It means, I need to replace these lines
+                 /* It is safe to push/pull even if skb_shared() */
+    			__skb_push(skb, skb->mac_len);
+    			bpf_compute_data_pointers(skb);
+    			filter_res = bpf_prog_run(prog->filter, skb);
+    			__skb_pull(skb, skb->mac_len);
+
+    			but make sure existing data structures like skb don't break or make system break
+    			so, we have to dig deeper when they drop the packets and follow the similar logic so that we make
+    			all used data strcutures in the same condition and then do short-circuiting and use our code.
