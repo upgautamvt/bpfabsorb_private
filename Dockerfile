@@ -49,7 +49,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
     xdp-tools \
     net-tools \
     iproute2 \
-    hping3 \
     htop \
     libcap-dev \
     libdisasm-dev \
@@ -57,7 +56,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
     unzip \
     pkg-config \
     lsb-release \
-    wget \
+    wget curl iputils-ping \
     software-properties-common \
     gnupg \
     zlib1g
