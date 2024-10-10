@@ -56,7 +56,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
     unzip \
     pkg-config \
     lsb-release \
-    wget curl iputils-ping \
+    wget curl \
     software-properties-common \
     gnupg \
     zlib1g
