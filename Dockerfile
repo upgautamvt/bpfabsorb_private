@@ -1,6 +1,9 @@
 FROM ubuntu:22.04 AS linux-builder
 
-ENV LINUX=/linux 
+
+ENV PATH=/linux/tools/lib/bpf/:$PATH \
+    LD_LIBRARY_PATH=/linux/tools/lib/bpf:$LD_LIBRARY_PATH \
+    LINUX=/linux
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
