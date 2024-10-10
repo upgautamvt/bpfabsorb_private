@@ -1,6 +1,7 @@
 #include <linux/bpf.h>
 #include <linux/if_ether.h>
 #include <linux/ip.h>
+#include <linux/tcp.h>
 #include <linux/types.h>
 #include <bpf/bpf_helpers.h>
 
@@ -36,11 +37,11 @@ int prog(struct __sk_buff *skb) {
     int index;
     __be32 *value = bpf_map_lookup_elem(&my_map, &index);
     if (value) {
-        if (src_ip == *value) {
-            return BPF_OK;
+        if (src_ip != *value) {
+            return BPF_DROP;
         }
     } else {
-        return BPF_DROP;
+        return BPF_OK;
     }
     return BPF_DROP;
 }

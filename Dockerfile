@@ -1,4 +1,4 @@
-FROM ubuntu:24.04 as Linux-builder
+FROM ubuntu:22.04 AS linux-builder
 
 ENV LINUX=/linux 
 
@@ -9,7 +9,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y git build-es
  libdw-dev libdwarf-dev \
  bpfcc-tools libbpfcc-dev libbpfcc \
  linux-headers-generic \
- libtinfo-dev \
+ libtinfo-dev terminator \
  libstdc++-11-dev libstdc++-12-dev \
  bc clang llvm \
  flex bison \
