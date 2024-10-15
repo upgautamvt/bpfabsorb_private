@@ -21,6 +21,10 @@
 #include <net/sock.h>
 #include <net/tc_wrapper.h>
 
+#include <linux/skbuff.h>
+#include <linux/if_ether.h>
+#include <linux/ip.h>
+
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Daniel Borkmann <dborkman@redhat.com>");
 MODULE_DESCRIPTION("TC BPF based classifier");
@@ -78,6 +82,42 @@ static int cls_bpf_exec_opcode(int code)
 	}
 }
 
+//removing all bpf related stuffs
+static inline int absorb_bpf_tc_ingress(struct sk_buff *skb) {
+	// Set up pointers to the start and end of the data
+	void *data = (void *)(long)skb->data;
+	void *data_end = (void *)(long)(skb->data + skb->len); // Calculate the end of the data
+
+	// Check for invalid Ethernet header and drop the packet
+	if (data + sizeof(struct ethhdr) > data_end) {
+		return -1; // Drop packet
+	}
+
+	struct ethhdr *eth = data;
+
+	// If not IPv4, continue processing
+	if (eth->h_proto != __constant_htons(ETH_P_IP)) {
+		return 0; // Continue processing
+	}
+
+	// Check for invalid IP header
+	if (data + sizeof(struct ethhdr) + sizeof(struct iphdr) > data_end) {
+		return -1; // Drop packet
+	}
+
+	struct iphdr *ip = (struct iphdr *)(data + sizeof(struct ethhdr));
+	__be32 src_ip = ip->saddr; // Get source IP
+
+	// Drop packets from 8.8.8.8
+	if (src_ip == __constant_htonl(0x08080808)) {
+		return -1; // Drop packet
+	}
+
+	// If all checks pass, continue processing
+	return 0;
+}
+
+
 TC_INDIRECT_SCOPE int cls_bpf_classify(struct sk_buff *skb,
 				       const struct tcf_proto *tp,
 				       struct tcf_result *res)
@@ -96,10 +136,32 @@ TC_INDIRECT_SCOPE int cls_bpf_classify(struct sk_buff *skb,
 			filter_res = prog->exts_integrated ? TC_ACT_UNSPEC : 0;
 		} else if (at_ingress) {
 			/* It is safe to push/pull even if skb_shared() */
-			__skb_push(skb, skb->mac_len);
-			bpf_compute_data_pointers(skb);
-			filter_res = bpf_prog_run(prog->filter, skb);
-			__skb_pull(skb, skb->mac_len);
+
+			//BPF Restrictions: BPF programs have strict memory access constraints,
+			// and they cannot modify the sk_buff structure directly.
+			// Therefore, any changes to skb->data need to be carefully managed.
+			// we don't need push/pull when we absorb.
+
+                        //link: https://github.com/iovisor/bcc/issues/1244
+			//struct sk_buff is an internal kernel struct. It is not part of the Linux API with userland, so its definition can change from one Linux version to another.
+			//struct __sk_buff contains similar fields and it is part of the Linux API. It used for example in bpf programs of type BPF_PROG_TYPE_SCHED_CLS.
+			//The 2 structs have different definitions, so they cannot be used for one another.
+
+
+			//further more: https://github.com/isovalent/ebpf-docs/blob/master/docs/linux/program-context/__sk_buff.md
+			//The socket buffer context is provided to program types that deal with network packets when there already is a socket buffer created/allocated. The struct __sk_buff is a "mirror" of the struct sk_buff program type which is actually used by the kernel.
+			//Accesses to the struct __sk_buff pointer are seamlessly transformed into accesses into the real socket buffer. This indirection exists to provide a stable ABI for programs since the struct sk_buff may change between kernel versions and to provide a layer of checks. Not all program types are allowed to read and/or write to certain fields for a number of reasons.
+
+			//so we don't need pull/push for our absorb
+			//__skb_push(skb, skb->mac_len);
+
+			//only replacing these below two lines with some optimizations such as no bpf related logic
+			//bpf_compute_data_pointers(skb);
+			//filter_res = bpf_prog_run(prog->filter, skb);
+			filter_res = absorb_bpf_tc_ingress(skb);
+
+			//don't need
+			//__skb_pull(skb, skb->mac_len);
 		} else {
 			bpf_compute_data_pointers(skb);
 			filter_res = bpf_prog_run(prog->filter, skb);

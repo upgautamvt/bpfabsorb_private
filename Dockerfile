@@ -1,4 +1,4 @@
-FROM ubuntu:24.04 as Linux-builder
+FROM ubuntu:24.04 as linux-builder
 
 ENV PATH=/linux/tools/lib/bpf/:/usr/local/cargo/bin:/linux/rust/dist/bin:$PATH \
     LD_LIBRARY_PATH=/linux/tools/lib/bpf:$LD_LIBRARY_PATH \
