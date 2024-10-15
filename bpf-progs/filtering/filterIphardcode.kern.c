@@ -29,12 +29,12 @@ int prog(struct __sk_buff *skb) {
     struct iphdr *ip = (struct iphdr *)(data + sizeof(struct ethhdr)); // Correct pointer arithmetic
     __be32 src_ip = ip->saddr; // Get source IP
 
-    // drop only for 8.8.8.8 IP packets
-    if (src_ip == __constant_htonl(0x08080808)) {
-        return BPF_DROP; // Drop packet if source IP is 8.8.8.8
+    // Drop packets from 192.168.1.1
+    if (src_ip == __constant_htonl(0xC0A80101)) {
+        return BPF_OK; //ACCEPT packet
     }
 
-    return BPF_OK;
+    return BPF_DROP; //DROP packet
 }
 
 char _license[] SEC("license") = "GPL";

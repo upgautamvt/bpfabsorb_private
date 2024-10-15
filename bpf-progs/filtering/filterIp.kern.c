@@ -44,27 +44,27 @@ int prog(struct __sk_buff *skb) {
         // Check if source IP matches the value in the map
         if (src_ip == *value) {
             // Print src_ip and value before dropping the packet
-            bpf_printk("Dropping packet from src_ip: %d.%d.%d.%d, value: %d.%d.%d.%d\n",
-                             src_ip & 0xFF,
-                             (src_ip >> 8) & 0xFF,
-                             (src_ip >> 16) & 0xFF,
-                             (src_ip >> 24) & 0xFF,
-                             (*value >> 0) & 0xFF,
-                             (*value >> 8) & 0xFF,
-                             (*value >> 16) & 0xFF,
-                             (*value >> 24) & 0xFF);
+//            bpf_printk("Dropping packet from src_ip: %d.%d.%d.%d, value: %d.%d.%d.%d\n",
+//                             src_ip & 0xFF,
+//                             (src_ip >> 8) & 0xFF,
+//                             (src_ip >> 16) & 0xFF,
+//                             (src_ip >> 24) & 0xFF,
+//                             (*value >> 0) & 0xFF,
+//                             (*value >> 8) & 0xFF,
+//                             (*value >> 16) & 0xFF,
+//                             (*value >> 24) & 0xFF);
             return BPF_DROP;
         } else {
             // Print src_ip and value before accepting the packet
-            bpf_printk("Accepting packet from src_ip: %d.%d.%d.%d, value: %d.%d.%d.%d\n",
-                             src_ip & 0xFF,
-                             (src_ip >> 8) & 0xFF,
-                             (src_ip >> 16) & 0xFF,
-                             (src_ip >> 24) & 0xFF,
-                             *value & 0xFF,
-                             (*value >> 8) & 0xFF,
-                             (*value >> 16) & 0xFF,
-                             (*value >> 24) & 0xFF);
+//            bpf_printk("Accepting packet from src_ip: %d.%d.%d.%d, value: %d.%d.%d.%d\n",
+//                             src_ip & 0xFF,
+//                             (src_ip >> 8) & 0xFF,
+//                             (src_ip >> 16) & 0xFF,
+//                             (src_ip >> 24) & 0xFF,
+//                             *value & 0xFF,
+//                             (*value >> 8) & 0xFF,
+//                             (*value >> 16) & 0xFF,
+//                             (*value >> 24) & 0xFF);
             return BPF_OK;
         }
     }

@@ -18,7 +18,7 @@ Steps to follow
     3) go to images directory, run download-img-vm1.sh script
     4) go to scripts directory, and run make-cloudinit-vm1.bash script
     5) Then from scripts directory, execute launch-vm1.bash (after first time, all you do 
-is make enter-docker and ./launch-vmI.bash script"
+is make enter-docker and ./launch-vm1.bash script"
     6) provide rosa/rosalab login
     7) lspci and ip a check bus number (e..g, from 01:04.3, 04 part is bus number, so choose ens<bus_number> interface)
     8) Assign static IP and 9000 MTU for SR-IOV VFIO nic inside VM
