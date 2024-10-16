@@ -1,0 +1,83 @@
+diff --git a/linux/net/sched/cls_bpf.c b/linux/net/sched/cls_bpf.c
+index 1941ebec2..fa5a53eec 100644
+--- a/linux/net/sched/cls_bpf.c
++++ b/linux/net/sched/cls_bpf.c
+@@ -21,6 +21,11 @@
+ #include <net/sock.h>
+ #include <net/tc_wrapper.h>
+ 
++#include <linux/skbuff.h>
++#include <linux/if_ether.h>
++#include <linux/ip.h>
++#include <linux/kernel.h>
++
+ MODULE_LICENSE("GPL");
+ MODULE_AUTHOR("Daniel Borkmann <dborkman@redhat.com>");
+ MODULE_DESCRIPTION("TC BPF based classifier");
+@@ -78,6 +83,46 @@ static int cls_bpf_exec_opcode(int code)
+ 	}
+ }
+ 
++static inline int absorb_bpf_tc_ingress(struct sk_buff *skb) {
++	//just to guarantee same performance when we don't migrate among cores
++	//and to avoid race conditions
++	cant_migrate();
++
++	//we don't need bpf related statistics such as how oftern bpf trigger function got dispatched etc.
++	//also we don't need bpf dispatcher function __bpf_prog_run in filter.h
++
++	// Set up pointers to the start and end of the data
++	void *data = (void *)(long)skb->data;
++	void *data_end = (void *)(long)(skb->data + skb->len); // Calculate the end of the data
++
++	// Check for invalid Ethernet header and drop the packet
++	if (data + sizeof(struct ethhdr) > data_end) {
++		return -1; // Drop packet
++	}
++
++	struct ethhdr *eth = data;
++
++	// If not IPv4, continue processing
++	if (eth->h_proto != __constant_htons(ETH_P_IP)) {
++		return 0; // Continue processing
++	}
++
++	// Check for invalid IP header
++	if (data + sizeof(struct ethhdr) + sizeof(struct iphdr) > data_end) {
++		return -1; // Drop packet
++	}
++
++	struct iphdr *ip = (struct iphdr *)(data + sizeof(struct ethhdr));
++	__be32 src_ip = ip->saddr; // Get source IP
++
++	if (src_ip == __constant_htonl(0xC0A80101)) {
++		return 0; //ACCEPT packet
++	}
++
++	return -1; //DROP packet
++}
++
++
+ TC_INDIRECT_SCOPE int cls_bpf_classify(struct sk_buff *skb,
+ 				       const struct tcf_proto *tp,
+ 				       struct tcf_result *res)
+@@ -95,12 +140,16 @@ TC_INDIRECT_SCOPE int cls_bpf_classify(struct sk_buff *skb,
+ 		if (tc_skip_sw(prog->gen_flags)) {
+ 			filter_res = prog->exts_integrated ? TC_ACT_UNSPEC : 0;
+ 		} else if (at_ingress) {
++			//ingress strips off link-layer headers, so we need to include them
+ 			/* It is safe to push/pull even if skb_shared() */
+-			__skb_push(skb, skb->mac_len);
++			__skb_push(skb, skb->mac_len); //include ethernet header as well
+ 			bpf_compute_data_pointers(skb);
+-			filter_res = bpf_prog_run(prog->filter, skb);
+-			__skb_pull(skb, skb->mac_len);
++			//filter_res = bpf_prog_run(prog->filter, skb);
++			filter_res = absorb_bpf_tc_ingress(skb);
++			__skb_pull(skb, skb->mac_len); //reset back so that ethernet frame is stripped off again
+ 		} else {
++			//we don't need __skb_push/pull in situtations other than
++			//ingress, because link-layers headers are there.
+ 			bpf_compute_data_pointers(skb);
+ 			filter_res = bpf_prog_run(prog->filter, skb);
+ 		}
