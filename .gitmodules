@@ -4,3 +4,6 @@
 [submodule "vm2"]
 	path = vm2
 	url = git@github.com:upgautamvt/vm2.git
+[submodule "linux"]
+	path = linux
+	url = git@github.com:upgautamvt/linux69.git
