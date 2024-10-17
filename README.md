@@ -17,10 +17,7 @@ manage all the packages locally.
 The `linux` directory contains a forked linux kernel source tree as a git submodule. The below commands help you to update it.
 
 ```sh
-git submodule init
-
-# This will take some time.
-git submodule update
+git submodule update --init --recursive
 ```
 
 #### Copy config file to linux folder
@@ -91,3 +88,51 @@ Then at the end of the line add the text ```"hostfwd=tcp::DOCKER_PORT-:QEMU_PORT
 **Note**: The idea is we can develop/debug in qemu (i.e., make qemu-run), but when we need real VM, we use vm<X> folders above.
 Because inside vm<X> we can install mellanox driver. We can't install mellanox driver in our qemu. Also, for cases like
 when we need multiple NIcs (including mellanox VFIO nic), we can do that in real vm<X. 
+
+
+
+Git branching strategies
+For main repo, and for all other submodules, we like to have same named branch. Checkout to same branch
+
+Make a bash script: ./checkout_all_same_branch.sh
+```cmake
+# Check out the branch in the main repository
+git fetch origin                                     # Fetch the latest changes for the main repo
+if git show-ref --quiet refs/heads/dev/upg/kernel_absorb; then
+    git checkout dev/upg/kernel_absorb              # If branch exists, switch to it
+else
+    git checkout -b dev/upg/kernel_absorb origin/dev/upg/kernel_absorb  # Create and switch to it
+fi
+
+# Check out the same branch in each submodule
+for submodule in linux vm1 vm2; do
+    cd $submodule
+    git fetch origin                                   # Fetch the latest changes from the remote
+    if git show-ref --quiet refs/heads/dev/upg/kernel_absorb; then
+        git checkout dev/upg/kernel_absorb           # If branch exists, switch to it
+    else
+        git checkout -b dev/upg/kernel_absorb origin/dev/upg/kernel_absorb  # Create and switch to it
+    fi
+    cd ..
+done
+```
+And run: ./checkout_all_same_branch.sh
+You can test
+```cmake
+rosa@sriov-vm2:~/bpfabsorb$ git branch
+* dev/upg/kernel_absorb
+  main
+  rosa@sriov-vm2:~/bpfabsorb$ cd linux/
+  rosa@sriov-vm2:~/bpfabsorb/linux$ git branch
+* dev/upg/kernel_absorb
+  master
+  rosa@sriov-vm2:~/bpfabsorb/linux$ cd ../vm1
+  rosa@sriov-vm2:~/bpfabsorb/vm1$ git branch
+* dev/upg/kernel_absorb
+  master
+  rosa@sriov-vm2:~/bpfabsorb/vm1$ cd ../vm2
+  rosa@sriov-vm2:~/bpfabsorb/vm2$ git branch
+* dev/upg/kernel_absorb
+  master
+```
+
