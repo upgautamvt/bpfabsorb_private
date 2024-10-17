@@ -1,3 +1,9 @@
 [submodule "linux"]
 	path = linux
-	url = git@github.com:rosalab/linux.git
+	url = git@github.com:upgautamvt/linux.git
+[submodule "vm1"]
+	path = vm1
+	url = git@github.com:upgautamvt/vm1.git
+[submodule "vm2"]
+	path = vm2
+	url = git@github.com:upgautamvt/vm2.git
