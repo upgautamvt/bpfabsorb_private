@@ -79,7 +79,7 @@ RUN ln -s /usr/bin/opt-18 /usr/bin/opt
 # Qemu
 RUN DEBIAN_FRONTEND=noninteractive apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils  \
-    virtinst libvirt-daemon xterm attr busybox openssh-server
+    virtinst libvirt-daemon xterm attr busybox
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-client openssh-server
