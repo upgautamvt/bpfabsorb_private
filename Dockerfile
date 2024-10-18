@@ -12,8 +12,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
     git \
     build-essential \
-    gcc cpio \
+    gcc \
     g++ \
+    cpio \
     fakeroot \
     libncurses5-dev \
     libssl-dev \
@@ -27,7 +28,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
     libdwarf-dev \
     bpfcc-tools \
     libbpfcc-dev \
-    libbpfcc zstd \
+    libbpfcc \
+    zstd \
     linux-headers-generic \
     libtinfo-dev \
     terminator \
@@ -35,7 +37,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
     libstdc++-12-dev \
     libstdc++-13-dev \
     libstdc++-14-dev \
-    bc fping \
+    bc \
+    fping \
     xterm \
     trace-cmd \
     tcpdump \
@@ -56,10 +59,30 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
     unzip \
     pkg-config \
     lsb-release \
-    wget curl \
+    wget \
+    curl \
     software-properties-common \
     gnupg \
-    zlib1g
+    zlib1g \
+    openssh-client \
+    openssh-server \
+    strace \
+    bpftrace \
+    tmux \
+    gdb \
+    attr \
+    busybox \
+    vim \
+    openssl \
+    genisoimage \
+    pciutils \
+    clang \
+    llvm \
+    libvirt-daemon-system \
+    libvirt-clients \
+    qemu-kvm \
+    libbpf-dev \
+    linux-tools-common
 
 
 RUN wget https://apt.llvm.org/llvm.sh
