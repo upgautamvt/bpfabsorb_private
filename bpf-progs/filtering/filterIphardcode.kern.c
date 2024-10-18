@@ -29,8 +29,8 @@ int prog(struct __sk_buff *skb) {
     struct iphdr *ip = (struct iphdr *)(data + sizeof(struct ethhdr)); // Correct pointer arithmetic
     __be32 src_ip = ip->saddr; // Get source IP
 
-    // Drop packets from 192.168.1.1
-    if (src_ip == __constant_htonl(0xC0A80101)) {
+    // Drop packets from 192.168.100.10
+    if (src_ip == __constant_htonl(0xC0A8640A)) {
         return BPF_OK; //ACCEPT packet
     }
 
