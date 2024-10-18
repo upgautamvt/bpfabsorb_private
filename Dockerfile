@@ -1,6 +1,6 @@
-FROM ubuntu:24.04 as linux-builder
+FROM ubuntu:24.04 AS linux-builder
 
-ENV PATH=/linux/tools/lib/bpf/:/usr/local/cargo/bin:/linux/rust/dist/bin:$PATH \
+ENV PATH=/linux/tools/lib/bpf/:$PATH \
     LD_LIBRARY_PATH=/linux/tools/lib/bpf:$LD_LIBRARY_PATH \
     LINUX=/linux
 
@@ -12,7 +12,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
     git \
     build-essential \
-    gcc \
+    gcc cpio \
     g++ \
     fakeroot \
     libncurses5-dev \
@@ -27,7 +27,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
     libdwarf-dev \
     bpfcc-tools \
     libbpfcc-dev \
-    libbpfcc \
+    libbpfcc zstd \
     linux-headers-generic \
     libtinfo-dev \
     terminator \
