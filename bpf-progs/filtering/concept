@@ -78,7 +78,7 @@ tc qdisc del dev eth0 clsact
 
 
 tc qdisc add dev ens4 clsact
-tc filter add dev ens4 ingress bpf da obj ./filterIphardcoded.kern.o sec tc/ingress
+tc filter add dev ens4 ingress bpf da obj ./filterIphardcode.kern.o sec tc/ingress
 ./filterIps.user 8.8.8.8
 
 cat /sys/kernel/debug/tracing/trace_pipe

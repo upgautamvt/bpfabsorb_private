@@ -80,7 +80,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
     llvm \
     libvirt-daemon-system \
     libvirt-clients \
-    qemu-kvm \
+    qemu-kvm gcc-multilib \
     libbpf-dev \
     linux-tools-common
 
