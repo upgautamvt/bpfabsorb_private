@@ -4,7 +4,6 @@ ENV PATH=/linux/tools/lib/bpf/:$PATH \
     LD_LIBRARY_PATH=/linux/tools/lib/bpf:$LD_LIBRARY_PATH \
     LINUX=/linux
 
-# adding clang
 RUN DEBIAN_FRONTEND=noninteractive apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
 
@@ -76,7 +75,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
     openssl \
     genisoimage \
     pciutils \
-    clang \
     llvm \
     libvirt-daemon-system \
     libvirt-clients \
