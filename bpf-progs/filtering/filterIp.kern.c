@@ -53,7 +53,7 @@ int prog(struct __sk_buff *skb) {
 //                             (*value >> 8) & 0xFF,
 //                             (*value >> 16) & 0xFF,
 //                             (*value >> 24) & 0xFF);
-            return BPF_DROP;
+            return BPF_OK;
         } else {
             // Print src_ip and value before accepting the packet
 //            bpf_printk("Accepting packet from src_ip: %d.%d.%d.%d, value: %d.%d.%d.%d\n",
@@ -65,7 +65,7 @@ int prog(struct __sk_buff *skb) {
 //                             (*value >> 8) & 0xFF,
 //                             (*value >> 16) & 0xFF,
 //                             (*value >> 24) & 0xFF);
-            return BPF_OK;
+            return BPF_DROP;
         }
     }
     return BPF_OK;
