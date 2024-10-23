@@ -34,7 +34,7 @@ int prog(struct __sk_buff *skb) {
         return BPF_OK; //ACCEPT packet
     }
 
-    return BPF_OK; //DROP packet
+    return BPF_OK; //ACCEPT packet
 }
 
 char _license[] SEC("license") = "GPL";
