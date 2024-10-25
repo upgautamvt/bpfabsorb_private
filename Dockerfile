@@ -86,16 +86,16 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
 RUN wget https://apt.llvm.org/llvm.sh
 RUN chmod +x llvm.sh
 RUN ./llvm.sh 18
-RUN ln -s /usr/bin/clang-18 /usr/bin/clang
-RUN ln -s /usr/bin/clang++-18 /usr/bin/clang++
-RUN ln -s /usr/bin/ld.lld-18 /usr/bin/ld.lld
-RUN ln -s /usr/bin/llvm-ar-18 /usr/bin/llvm-ar
-RUN ln -s /usr/bin/llvm-strip-18 /usr/bin/llvm-strip
-RUN ln -s /usr/bin/llvm-objdump-18 /usr/bin/llvm-objdump
-RUN ln -s /usr/bin/llc-18 /usr/bin/llc
-RUN ln -s /usr/bin/llvm-readelf-18 /usr/bin/llvm-readelf
-RUN ln -s /usr/bin/llvm-dis-18 /usr/bin/llvm-dis
-RUN ln -s /usr/bin/opt-18 /usr/bin/opt
+RUN ln -sf /usr/bin/clang-18 /usr/bin/clang
+RUN ln -sf /usr/bin/clang++-18 /usr/bin/clang++
+RUN ln -sf /usr/bin/ld.lld-18 /usr/bin/ld.lld
+RUN ln -sf /usr/bin/llvm-ar-18 /usr/bin/llvm-ar
+RUN ln -sf /usr/bin/llvm-strip-18 /usr/bin/llvm-strip
+RUN ln -sf /usr/bin/llvm-objdump-18 /usr/bin/llvm-objdump
+RUN ln -sf /usr/bin/llc-18 /usr/bin/llc
+RUN ln -sf /usr/bin/llvm-readelf-18 /usr/bin/llvm-readelf
+RUN ln -sf /usr/bin/llvm-dis-18 /usr/bin/llvm-dis
+RUN ln -sf /usr/bin/opt-18 /usr/bin/opt
 
 # Qemu
 RUN DEBIAN_FRONTEND=noninteractive apt-get update

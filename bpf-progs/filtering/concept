@@ -69,16 +69,27 @@ tc qdisc del dev eth0 clsact
 
 
 
+Host QEMU testing:
 
+(we must do these below lines in both vanilla bpf and kernel absorb cases)
+tc qdisc add dev eth0 clsact
+tc filter add dev eth0 ingress bpf da obj ./verybig.kern.o sec tc/ingress
 
+rm -rf /sys/fs/bpf/xdp/globals/my_map
+rm -rf /sys/fs/bpf/verybig
 
-
-
+tail /proc/kallsyms
 
 
 
 sudo tc qdisc add dev ens4 clsact
-sudo tc filter add dev ens4 ingress bpf da obj ./filterIphardcode.kern.o sec tc/ingress
+sudo tc filter add dev ens4 ingress bpf da obj ./small.kern.o sec tc/ingress
+sudo tc filter add dev ens4 ingress bpf da obj ./big.kern.o sec tc/ingress
+sudo tc filter add dev ens4 ingress bpf da obj ./verybig.kern.o sec tc/ingress
+
+
+
+
 sudo ./filterIps.user 192.168.100.10
 
 cat /sys/kernel/debug/tracing/trace_pipe
@@ -132,6 +143,9 @@ Idea (load the bpf program)
 
     ffffffffa0000794 is the address where you should put breakpoint in gdb
     b 0Xffffffffa0000794
+
+    Note: here we have all the symbols table from vmlinux, but 0Xffffffffa0000794 is not in vmlinux
+    because bpf is runtime thing and that is only updated in /proc/kallsyms virtual file
 
 
     upgautamvt@upg-vt-lab:~/CLionProjects/bpfabsorb/linux$ gdb vmlinux
