@@ -12,6 +12,15 @@ struct {
     __uint(pinning, LIBBPF_PIN_BY_NAME);
 } my_map SEC(".maps");
 
+// Loop callback to populate the BPF map
+static long populate_map_callback(__u64 index, void *ctx) {
+    __u32 key = index;
+    __be32 value = key * 10; // Arbitrary value based on the key
+
+    // Update the BPF map
+    bpf_map_update_elem(&my_map, &key, &value, BPF_ANY);
+    return 0; // Continue to the next loop
+}
 
 SEC("tc/ingress")
 int verybig(struct __sk_buff *skb) {
@@ -38,35 +47,19 @@ int verybig(struct __sk_buff *skb) {
     struct iphdr *ip = (struct iphdr *)(data + sizeof(struct ethhdr)); // Correct pointer arithmetic
     __be32 src_ip = ip->saddr; // Get source IP
 
-    int index = 0;
-    __be32 *value;
-    long ret;
-
-    ret = bpf_map_update_elem(&my_map, &index, &src_ip, BPF_ANY); //update bpf map
-    ret = bpf_map_update_elem(&my_map, &index, &src_ip, BPF_ANY);
-    ret = bpf_map_update_elem(&my_map, &index, &src_ip, BPF_ANY);
-    ret = bpf_map_update_elem(&my_map, &index, &src_ip, BPF_ANY);
-    ret = bpf_map_update_elem(&my_map, &index, &src_ip, BPF_ANY);
-    ret = bpf_map_update_elem(&my_map, &index, &src_ip, BPF_ANY);
-    ret = bpf_map_update_elem(&my_map, &index, &src_ip, BPF_ANY);
-    ret = bpf_map_update_elem(&my_map, &index, &src_ip, BPF_ANY);
-    ret = bpf_map_update_elem(&my_map, &index, &src_ip, BPF_ANY);
-    ret = bpf_map_update_elem(&my_map, &index, &src_ip, BPF_ANY);
-    //logic to read the value in index 0 of my_map 10 times
-    value = bpf_map_lookup_elem(&my_map, &index); // Lookup value from BPF map
-    value = bpf_map_lookup_elem(&my_map, &index);
-    value = bpf_map_lookup_elem(&my_map, &index);
-    value = bpf_map_lookup_elem(&my_map, &index);
-    value = bpf_map_lookup_elem(&my_map, &index);
-    value = bpf_map_lookup_elem(&my_map, &index);
-    value = bpf_map_lookup_elem(&my_map, &index);
-    value = bpf_map_lookup_elem(&my_map, &index);
-    value = bpf_map_lookup_elem(&my_map, &index);
-    value = bpf_map_lookup_elem(&my_map, &index);
-
+    //do something time consuming
+    bpf_loop(1024, populate_map_callback, NULL, 0);
+    bpf_loop(1024, populate_map_callback, NULL, 0);
+    bpf_loop(1024, populate_map_callback, NULL, 0);
+    bpf_loop(1024, populate_map_callback, NULL, 0);
+    bpf_loop(1024, populate_map_callback, NULL, 0);
+    bpf_loop(1024, populate_map_callback, NULL, 0);
+    bpf_loop(1024, populate_map_callback, NULL, 0);
+    bpf_loop(1024, populate_map_callback, NULL, 0);
+    bpf_loop(1024, populate_map_callback, NULL, 0);
+    bpf_loop(1024, populate_map_callback, NULL, 0);
 
     return BPF_OK;
 }
 
 char _license[] SEC("license") = "GPL";
-

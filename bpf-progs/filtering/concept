@@ -74,9 +74,19 @@ Host QEMU testing:
 (we must do these below lines in both vanilla bpf and kernel absorb cases)
 tc qdisc add dev eth0 clsact
 tc filter add dev eth0 ingress bpf da obj ./verybig.kern.o sec tc/ingress
+fping -I eth0 -c 1 75.75.75.75
+bpftool map dump name my_map
+
+tc qdisc del dev eth0 clsact
+cat /sys/kernel/debug/tracing/trace_pipe
 
 rm -rf /sys/fs/bpf/xdp/globals/my_map
 rm -rf /sys/fs/bpf/verybig
+
+
+bpftool map create /sys/fs/bpf/my_map_kernel \
+        type array key 4 value 32 entries 1024 name my_map_kernel
+
 
 tail /proc/kallsyms
 
