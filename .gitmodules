@@ -7,3 +7,6 @@
 [submodule "linux"]
 	path = linux
 	url = git@github.com:upgautamvt/linux69.git
+[submodule "benchmarking"]
+	path = benchmarking
+	url = git@github.com:upgautamvt/benchmarking.git
