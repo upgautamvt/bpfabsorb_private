@@ -91,10 +91,18 @@ bpftool map create /sys/fs/bpf/my_map_kernel \
 tail /proc/kallsyms
 
 
+(client)               taskset 0xFF memaslap -s 192.168.200.1 -c 512 -T 8 -n 1 -w 600k -t 600s --stat_freq 10s | sed -r "s/\x1B\[[0-9;]*[a-zA-Z]//g" > memaslap_vanilla.txt
+
+(client)               taskset 0xFF memaslap -s 192.168.200.1 -c 512 -T 8 -n 1 -w 600k -t 600s --stat_freq 10s | sed -r "s/\x1B\[[0-9;]*[a-zA-Z]//g" > memaslap_vanilla_bpf_attach.txt
+
+(client)           taskset 0xFF memaslap -s 192.168.200.1 -c 512 -T 8 -n 1 -w 600k -t 600s --stat_freq 10s | sed -r "s/\x1B\[[0-9;]*[a-zA-Z]//g" > memaslap_absorb.txt
+
+(server)            taskset 0xFF memcached -t 8 -m 4092 -l 0.0.0.0
+
+
+
 
 sudo tc qdisc add dev ens4 clsact
-sudo tc filter add dev ens4 ingress bpf da obj ./small.kern.o sec tc/ingress
-sudo tc filter add dev ens4 ingress bpf da obj ./big.kern.o sec tc/ingress
 sudo tc filter add dev ens4 ingress bpf da obj ./verybig.kern.o sec tc/ingress
 
 
