@@ -1,96 +1,87 @@
-	.file	"ModelFunctionInlined.user.c"
 	.text
-	.section	.rodata.str1.1,"aMS",@progbits,1
-.LC0:
-	.string	"Result: %ld\n"
-.LC2:
-	.string	"Execution time: %lf seconds\n"
-	.section	.text.startup,"ax",@progbits
-	.p2align 4
+	.file	"ModelFunctionInlined.user.c"
+	.section	.rodata.cst8,"aM",@progbits,8
+	.p2align	3, 0x0                          # -- Begin function main
+.LCPI0_0:
+	.quad	0x412e848000000000              # double 1.0E+6
+	.text
 	.globl	main
-	.type	main, @function
-main:
-.LFB18:
+	.p2align	4, 0x90
+	.type	main,@function
+main:                                   # @main
 	.cfi_startproc
-	endbr64
-	pushq	%r12
+# %bb.0:
+	pushq	%r15
 	.cfi_def_cfa_offset 16
-	.cfi_offset 12, -16
-	pushq	%rbp
+	pushq	%r14
 	.cfi_def_cfa_offset 24
-	.cfi_offset 6, -24
 	pushq	%rbx
 	.cfi_def_cfa_offset 32
-	.cfi_offset 3, -32
-	xorl	%ebx, %ebx
-	call	clock@PLT
-	movl	$100, %ecx
-	movq	%rax, %r12
-	jmp	.L3
-	.p2align 4,,10
-	.p2align 3
-.L9:
-	subq	$2, %rax
-	shrq	%rax
-	leaq	1(%rax), %rbx
-	subq	$1, %rcx
-	je	.L8
-.L3:
-	leaq	5(%rbx), %rdx
-	movslq	%edx, %rdx
-	leaq	(%rdx,%rdx,2), %rax
-	cmpq	$1, %rax
-	jg	.L9
-	xorl	%ebx, %ebx
-	subq	$1, %rcx
-	jne	.L3
-.L8:
-	call	clock@PLT
-	movq	%rbx, %rdx
-	movl	$2, %edi
-	leaq	.LC0(%rip), %rsi
-	movq	%rax, %rbp
+	.cfi_offset %rbx, -32
+	.cfi_offset %r14, -24
+	.cfi_offset %r15, -16
+	movl	$100, %r15d
+	xorl	%r14d, %r14d
+	callq	clock@PLT
+	movq	%rax, %rbx
+	jmp	.LBB0_1
+	.p2align	4, 0x90
+.LBB0_3:                                #   in Loop: Header=BB0_1 Depth=1
+	leaq	(%rax,%rax,2), %r14
+	cmpq	$3, %r14
+	movl	$3, %eax
+	cmovlq	%r14, %rax
+	subq	%rax, %r14
+	incq	%r14
+	shrq	%r14
+	incq	%r14
+	decq	%r15
+	je	.LBB0_5
+.LBB0_1:                                # =>This Inner Loop Header: Depth=1
+	addl	$5, %r14d
+	movslq	%r14d, %rax
+	testq	%rax, %rax
+	jg	.LBB0_3
+# %bb.2:                                #   in Loop: Header=BB0_1 Depth=1
+	xorl	%r14d, %r14d
+	decq	%r15
+	jne	.LBB0_1
+.LBB0_5:
+	callq	clock@PLT
+	movq	%rax, %r15
+	leaq	.L.str(%rip), %rdi
+	movq	%r14, %rsi
 	xorl	%eax, %eax
-	call	__printf_chk@PLT
-	subq	%r12, %rbp
-	pxor	%xmm0, %xmm0
-	leaq	.LC2(%rip), %rsi
-	movl	$2, %edi
-	cvtsi2sdq	%rbp, %xmm0
-	movl	$1, %eax
-	divsd	.LC1(%rip), %xmm0
-	call	__printf_chk@PLT
+	callq	printf@PLT
+	subq	%rbx, %r15
+	cvtsi2sd	%r15, %xmm0
+	divsd	.LCPI0_0(%rip), %xmm0
+	leaq	.L.str.1(%rip), %rdi
+	movb	$1, %al
+	callq	printf@PLT
+	xorl	%eax, %eax
 	popq	%rbx
 	.cfi_def_cfa_offset 24
-	xorl	%eax, %eax
-	popq	%rbp
+	popq	%r14
 	.cfi_def_cfa_offset 16
-	popq	%r12
+	popq	%r15
 	.cfi_def_cfa_offset 8
-	ret
+	retq
+.Lfunc_end0:
+	.size	main, .Lfunc_end0-main
 	.cfi_endproc
-.LFE18:
-	.size	main, .-main
-	.section	.rodata.cst8,"aM",@progbits,8
-	.align 8
-.LC1:
-	.long	0
-	.long	1093567616
-	.ident	"GCC: (Ubuntu 13.2.0-23ubuntu4) 13.2.0"
-	.section	.note.GNU-stack,"",@progbits
-	.section	.note.gnu.property,"a"
-	.align 8
-	.long	1f - 0f
-	.long	4f - 1f
-	.long	5
-0:
-	.string	"GNU"
-1:
-	.align 8
-	.long	0xc0000002
-	.long	3f - 2f
-2:
-	.long	0x3
-3:
-	.align 8
-4:
+                                        # -- End function
+	.type	.L.str,@object                  # @.str
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.L.str:
+	.asciz	"Result: %ld\n"
+	.size	.L.str, 13
+
+	.type	.L.str.1,@object                # @.str.1
+.L.str.1:
+	.asciz	"Execution time: %lf seconds\n"
+	.size	.L.str.1, 29
+
+	.ident	"Ubuntu clang version 18.1.3 (1ubuntu1)"
+	.section	".note.GNU-stack","",@progbits
+	.addrsig

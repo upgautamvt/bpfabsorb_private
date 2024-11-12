@@ -62,7 +62,7 @@ gcc -O2 -o ModelFunctionInlined ModelFunctionInlined.s
 gcc -O2 -fno-inline -fopt-info-optimized -fopt-info-missed -o ModelFunctionInlined.s ModelFunctionInlined.user.c 2> gcc_compile_inlined.log
 
 clang -O2 -fno-inline -S -Rpass=.* -Rpass-missed=.* -o ModelFunctionInlined.s ModelFunctionInlined.user.c 2> clang_compile_inlined.log
-gcc -O2 -o ModelFunctionInlined ModelFunctionInlined.s
+clang -O2 -o ModelFunctionInlined ModelFunctionInlined.s
 
 Actual test
     upgautam@UddhavPc:~/CLionProjects/bpfabsorb/bpf-progs/filtering$ ./ModelFunctionNotInlined

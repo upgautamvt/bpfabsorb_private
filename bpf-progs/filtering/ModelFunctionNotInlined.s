@@ -1,208 +1,226 @@
-	.file	"ModelFunctionNotInlined.user.c"
 	.text
-	.p2align 4
-	.globl	add
-	.type	add, @function
-add:
-.LFB13:
+	.file	"ModelFunctionNotInlined.user.c"
+	.globl	add                             # -- Begin function add
+	.p2align	4, 0x90
+	.type	add,@function
+add:                                    # @add
 	.cfi_startproc
-	endbr64
+# %bb.0:
 	movslq	%esi, %rax
 	addq	%rdi, %rax
-	ret
+	retq
+.Lfunc_end0:
+	.size	add, .Lfunc_end0-add
 	.cfi_endproc
-.LFE13:
-	.size	add, .-add
-	.p2align 4
-	.globl	sub
-	.type	sub, @function
-sub:
-.LFB14:
+                                        # -- End function
+	.globl	sub                             # -- Begin function sub
+	.p2align	4, 0x90
+	.type	sub,@function
+sub:                                    # @sub
 	.cfi_startproc
-	endbr64
+# %bb.0:
 	negl	%esi
-	jmp	add
+                                        # kill: def $esi killed $esi killed $rsi
+	jmp	add                             # TAILCALL
+.Lfunc_end1:
+	.size	sub, .Lfunc_end1-sub
 	.cfi_endproc
-.LFE14:
-	.size	sub, .-sub
-	.p2align 4
-	.globl	mul
-	.type	mul, @function
-mul:
-.LFB15:
+                                        # -- End function
+	.globl	mul                             # -- Begin function mul
+	.p2align	4, 0x90
+	.type	mul,@function
+mul:                                    # @mul
 	.cfi_startproc
-	endbr64
-	movq	%rsi, %r8
+# %bb.0:
 	testq	%rsi, %rsi
-	jle	.L7
-	movl	%edi, %ecx
-	xorl	%edx, %edx
-	xorl	%edi, %edi
-	.p2align 4,,10
-	.p2align 3
-.L6:
-	movl	%ecx, %esi
-	addq	$1, %rdx
-	call	add
-	movq	%rax, %rdi
-	cmpq	%rdx, %r8
-	jne	.L6
-	movq	%rdi, %rax
-	ret
-	.p2align 4,,10
-	.p2align 3
-.L7:
-	xorl	%edi, %edi
-	movq	%rdi, %rax
-	ret
-	.cfi_endproc
-.LFE15:
-	.size	mul, .-mul
-	.p2align 4
-	.globl	div_int
-	.type	div_int, @function
-div_int:
-.LFB16:
-	.cfi_startproc
-	endbr64
-	movq	%rdi, %rdx
-	movq	%rsi, %r8
-	xorl	%ecx, %ecx
-	cmpq	%rsi, %rdi
-	jl	.L9
-	.p2align 4,,10
-	.p2align 3
-.L11:
-	movq	%rdx, %rdi
-	movq	%r8, %rsi
-	call	sub
-	movq	%rcx, %rdi
-	movl	$1, %esi
-	movq	%rax, %rdx
-	call	add
-	movq	%rax, %rcx
-	cmpq	%rdx, %r8
-	jle	.L11
-.L9:
-	movq	%rcx, %rax
-	ret
-	.cfi_endproc
-.LFE16:
-	.size	div_int, .-div_int
-	.p2align 4
-	.globl	performComplexComputation
-	.type	performComplexComputation, @function
-performComplexComputation:
-.LFB17:
-	.cfi_startproc
-	endbr64
-	movq	%rdi, %r9
-	testq	%rdi, %rdi
-	jle	.L17
-	xorl	%r10d, %r10d
-	xorl	%edi, %edi
-	.p2align 4,,10
-	.p2align 3
-.L16:
-	movl	$10, %esi
-	addq	$1, %r10
-	call	add
-	movl	$5, %esi
-	movq	%rax, %rdi
-	call	sub
-	movl	$3, %esi
-	movq	%rax, %rdi
-	call	mul
-	movl	$2, %esi
-	movq	%rax, %rdi
-	call	div_int
-	movq	%rax, %rdi
-	cmpq	%r10, %r9
-	jne	.L16
-	movq	%rdi, %rax
-	ret
-	.p2align 4,,10
-	.p2align 3
-.L17:
-	xorl	%edi, %edi
-	movq	%rdi, %rax
-	ret
-	.cfi_endproc
-.LFE17:
-	.size	performComplexComputation, .-performComplexComputation
-	.section	.rodata.str1.1,"aMS",@progbits,1
-.LC0:
-	.string	"Result: %ld\n"
-.LC2:
-	.string	"Execution time: %lf seconds\n"
-	.section	.text.startup,"ax",@progbits
-	.p2align 4
-	.globl	main
-	.type	main, @function
-main:
-.LFB18:
-	.cfi_startproc
-	endbr64
-	pushq	%r12
+	jle	.LBB2_1
+# %bb.3:
+	pushq	%r14
 	.cfi_def_cfa_offset 16
-	.cfi_offset 12, -16
-	pushq	%rbp
+	pushq	%rbx
 	.cfi_def_cfa_offset 24
-	.cfi_offset 6, -24
+	pushq	%rax
+	.cfi_def_cfa_offset 32
+	.cfi_offset %rbx, -24
+	.cfi_offset %r14, -16
+	movq	%rsi, %rbx
+	movq	%rdi, %r14
+	xorl	%eax, %eax
+	.p2align	4, 0x90
+.LBB2_4:                                # =>This Inner Loop Header: Depth=1
+	movq	%rax, %rdi
+	movl	%r14d, %esi
+	callq	add
+	decq	%rbx
+	jne	.LBB2_4
+# %bb.5:
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 24
+	popq	%rbx
+	.cfi_def_cfa_offset 16
+	popq	%r14
+	.cfi_def_cfa_offset 8
+	.cfi_restore %rbx
+	.cfi_restore %r14
+	retq
+.LBB2_1:
+	xorl	%eax, %eax
+	retq
+.Lfunc_end2:
+	.size	mul, .Lfunc_end2-mul
+	.cfi_endproc
+                                        # -- End function
+	.globl	div_int                         # -- Begin function div_int
+	.p2align	4, 0x90
+	.type	div_int,@function
+div_int:                                # @div_int
+	.cfi_startproc
+# %bb.0:
+	pushq	%r15
+	.cfi_def_cfa_offset 16
+	pushq	%r14
+	.cfi_def_cfa_offset 24
 	pushq	%rbx
 	.cfi_def_cfa_offset 32
-	.cfi_offset 3, -32
-	call	clock@PLT
-	movl	$100, %edi
-	movq	%rax, %rbp
-	call	performComplexComputation
-	movq	%rax, %r12
-	call	clock@PLT
-	movq	%r12, %rdx
-	movl	$2, %edi
-	leaq	.LC0(%rip), %rsi
-	movq	%rax, %rbx
-	xorl	%eax, %eax
-	call	__printf_chk@PLT
-	subq	%rbp, %rbx
-	pxor	%xmm0, %xmm0
-	leaq	.LC2(%rip), %rsi
-	movl	$2, %edi
-	cvtsi2sdq	%rbx, %xmm0
-	movl	$1, %eax
-	divsd	.LC1(%rip), %xmm0
-	call	__printf_chk@PLT
+	.cfi_offset %rbx, -32
+	.cfi_offset %r14, -24
+	.cfi_offset %r15, -16
+	cmpq	%rsi, %rdi
+	jge	.LBB3_2
+# %bb.1:
+	xorl	%r14d, %r14d
+	jmp	.LBB3_4
+.LBB3_2:
+	movq	%rsi, %rbx
+	movq	%rdi, %r15
+	xorl	%r14d, %r14d
+	.p2align	4, 0x90
+.LBB3_3:                                # =>This Inner Loop Header: Depth=1
+	movq	%r15, %rdi
+	movq	%rbx, %rsi
+	callq	sub
+	movq	%rax, %r15
+	movq	%r14, %rdi
+	movl	$1, %esi
+	callq	add
+	movq	%rax, %r14
+	cmpq	%rbx, %r15
+	jge	.LBB3_3
+.LBB3_4:
+	movq	%r14, %rax
 	popq	%rbx
 	.cfi_def_cfa_offset 24
-	xorl	%eax, %eax
-	popq	%rbp
+	popq	%r14
 	.cfi_def_cfa_offset 16
-	popq	%r12
+	popq	%r15
 	.cfi_def_cfa_offset 8
-	ret
+	retq
+.Lfunc_end3:
+	.size	div_int, .Lfunc_end3-div_int
 	.cfi_endproc
-.LFE18:
-	.size	main, .-main
+                                        # -- End function
+	.globl	performComplexComputation       # -- Begin function performComplexComputation
+	.p2align	4, 0x90
+	.type	performComplexComputation,@function
+performComplexComputation:              # @performComplexComputation
+	.cfi_startproc
+# %bb.0:
+	testq	%rdi, %rdi
+	jle	.LBB4_1
+# %bb.3:
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset %rbx, -16
+	movq	%rdi, %rbx
+	xorl	%eax, %eax
+	.p2align	4, 0x90
+.LBB4_4:                                # =>This Inner Loop Header: Depth=1
+	movq	%rax, %rdi
+	movl	$10, %esi
+	callq	add
+	movl	$5, %esi
+	movq	%rax, %rdi
+	callq	sub
+	movl	$3, %esi
+	movq	%rax, %rdi
+	callq	mul
+	movl	$2, %esi
+	movq	%rax, %rdi
+	callq	div_int
+	decq	%rbx
+	jne	.LBB4_4
+# %bb.5:
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	.cfi_restore %rbx
+	retq
+.LBB4_1:
+	xorl	%eax, %eax
+	retq
+.Lfunc_end4:
+	.size	performComplexComputation, .Lfunc_end4-performComplexComputation
+	.cfi_endproc
+                                        # -- End function
 	.section	.rodata.cst8,"aM",@progbits,8
-	.align 8
-.LC1:
-	.long	0
-	.long	1093567616
-	.ident	"GCC: (Ubuntu 13.2.0-23ubuntu4) 13.2.0"
-	.section	.note.GNU-stack,"",@progbits
-	.section	.note.gnu.property,"a"
-	.align 8
-	.long	1f - 0f
-	.long	4f - 1f
-	.long	5
-0:
-	.string	"GNU"
-1:
-	.align 8
-	.long	0xc0000002
-	.long	3f - 2f
-2:
-	.long	0x3
-3:
-	.align 8
-4:
+	.p2align	3, 0x0                          # -- Begin function main
+.LCPI5_0:
+	.quad	0x412e848000000000              # double 1.0E+6
+	.text
+	.globl	main
+	.p2align	4, 0x90
+	.type	main,@function
+main:                                   # @main
+	.cfi_startproc
+# %bb.0:
+	pushq	%r15
+	.cfi_def_cfa_offset 16
+	pushq	%r14
+	.cfi_def_cfa_offset 24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset %rbx, -32
+	.cfi_offset %r14, -24
+	.cfi_offset %r15, -16
+	callq	clock@PLT
+	movq	%rax, %rbx
+	movl	$100, %edi
+	callq	performComplexComputation
+	movq	%rax, %r14
+	callq	clock@PLT
+	movq	%rax, %r15
+	leaq	.L.str(%rip), %rdi
+	movq	%r14, %rsi
+	xorl	%eax, %eax
+	callq	printf@PLT
+	subq	%rbx, %r15
+	cvtsi2sd	%r15, %xmm0
+	divsd	.LCPI5_0(%rip), %xmm0
+	leaq	.L.str.1(%rip), %rdi
+	movb	$1, %al
+	callq	printf@PLT
+	xorl	%eax, %eax
+	popq	%rbx
+	.cfi_def_cfa_offset 24
+	popq	%r14
+	.cfi_def_cfa_offset 16
+	popq	%r15
+	.cfi_def_cfa_offset 8
+	retq
+.Lfunc_end5:
+	.size	main, .Lfunc_end5-main
+	.cfi_endproc
+                                        # -- End function
+	.type	.L.str,@object                  # @.str
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.L.str:
+	.asciz	"Result: %ld\n"
+	.size	.L.str, 13
+
+	.type	.L.str.1,@object                # @.str.1
+.L.str.1:
+	.asciz	"Execution time: %lf seconds\n"
+	.size	.L.str.1, 29
+
+	.ident	"Ubuntu clang version 18.1.3 (1ubuntu1)"
+	.section	".note.GNU-stack","",@progbits
+	.addrsig

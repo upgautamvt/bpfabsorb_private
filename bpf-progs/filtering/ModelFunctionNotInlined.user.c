@@ -64,6 +64,6 @@ gcc -O2 -fno-inline -fopt-info-optimized -fopt-info-missed -o ModelFunctionNotIn
 
 
 clang -O2 -fno-inline -S -Rpass=.* -Rpass-missed=.* -o ModelFunctionNotInlined.s ModelFunctionNotInlined.user.c 2> clang_compile_not_inlined.log
-gcc -O2 -o ModelFunctionNotInlined ModelFunctionNotInlined.s
+clang -O2 -o ModelFunctionNotInlined ModelFunctionNotInlined.s
 
 */
