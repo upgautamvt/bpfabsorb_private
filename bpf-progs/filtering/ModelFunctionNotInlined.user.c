@@ -1,72 +1,69 @@
 //file: ModelFunctionNotInlined.user.c
+
 #include <stdio.h>
 #include <time.h>
 
-typedef struct {
-    int x;
-    int y;
-    int z;
-} ComplexObject;
-
-long longFunction() {
-    long dummy = 0;
-    for (unsigned long long i = 0; i < 10000000000; i++) {
-        dummy += i;
-    }
-    return dummy;
+long add(long x, int y) {
+    return x + y;
 }
 
-long functionA(ComplexObject obj) {
-    long dummy = 0;
-    for (unsigned long long i = 0; i < obj.x; i++) {
-        dummy += i;
-    }
-
-    // Unrolling loop with a factor of 4
-    unsigned long long i = 0;
-    for (; i < obj.x / 4 * 4; i += 4) {
-        dummy += i;
-        dummy += i + 1;
-        dummy += i + 2;
-        dummy += i + 3;
-    }
-
-    // Handle remaining iterations (less than 4)
-    for (; i < obj.x; i++) {
-        dummy += i;
-    }
-
-    //constant folding
-    if (obj.x == 10) {
-        return 45;  // Precomputed sum of numbers from 0 to 9
-    }
-    for (unsigned long long i = 0; i < obj.x; i++) {
-        dummy += i;
-    }
-
-    //dead code elimination if we don't consume the return value from longFunction
-    longFunction();
-
-    return dummy;
+long sub(long x, long y) {
+    return add(x, -y);//no inline-optimized
 }
 
-// Main function
+long mul(long x, long y) {
+    long result = 0;
+    for (long i = 0; i < y; i++) { //couldn't vectorize loop
+        result = add(result, x);//no inline-optimized, no vectorized
+    }
+    return result;
+}
+
+long div_int(long x, long y) {
+    long result = 0;
+    while (x >= y) { //couldn't vectorize loop, couldn't vectorized as no. of parameters can't be computed
+        x = sub(x, y);//no inline-optimized
+        result = add(result, 1);//no inline-optimized
+    }
+    return result;
+}
+
+long performComplexComputation(long iterations) {
+    long result = 0;
+    for (long i = 0; i < iterations; i++) { //couldn't vectorize loop
+        result = add(result, 10);//no inline-optimized, no vectorized
+        result = sub(result, 5);//no inline-optimized
+        result = mul(result, 3);//no inline-optimized
+        result = div_int(result, 2);//no inline-optimized
+    }
+    return result;
+}
+
 int main() {
-    long val = 0l;
+    long result = 0;
     clock_t start, end;
-    start = clock();  // Start the timer
-    ComplexObject obj1 = {10000000, 0, 0};  // Increased x for multiple calls
-    for (int i = 0; i < 1000; i++) {  // Call it many times
-        val = functionA(obj1);
-    }
-    end = clock();
-    printf("Vaue: %ld\n", val); //if we don't consume the return value O2 eliminates the whole function as deadcode.
-    printf("Function time (inlined): %lf seconds\n", (double)(end - start) / CLOCKS_PER_SEC);
+
+    start = clock(); //not optimized, stmt. clobbers memory
+    result = performComplexComputation(100);  //not optimized
+    end = clock(); //not optimized, stmt. clobbers memory
+
+    printf("Result: %ld\n", result);  //o
+    printf("Execution time: %lf seconds\n", (double)(end - start) / CLOCKS_PER_SEC); //o
+
     return 0;
 }
 
 /*
 Compile as:
 Using these compiler flags trying to match eBPF programs behavior when they are launched from kernel
-gcc -O2 -fno-lto -fno-inline -fno-unroll-loops -o ModelFunctionNotInlined ModelFunctionNotInlined.user.c
+
+gcc -O2 -fno-inline -S -fopt-info-optimized -fopt-info-missed -o ModelFunctionNotInlined.s ModelFunctionNotInlined.user.c 2> gcc_compile_not_inlined.log
+gcc -O2 -o ModelFunctionNotInlined ModelFunctionNotInlined.s
+
+gcc -O2 -fno-inline -fopt-info-optimized -fopt-info-missed -o ModelFunctionNotInlined.s ModelFunctionNotInlined.user.c 2> gcc_compile_not_inlined.log
+
+
+clang -O2 -fno-inline -S -Rpass=.* -Rpass-missed=.* -o ModelFunctionNotInlined.s ModelFunctionNotInlined.user.c 2> clang_compile_not_inlined.log
+gcc -O2 -o ModelFunctionNotInlined ModelFunctionNotInlined.s
+
 */
