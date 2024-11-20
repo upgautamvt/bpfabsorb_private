@@ -8,7 +8,7 @@ GDB_PORT ?= "1234"
 all: vmlinux 
 
 docker: .ALWAYS
-	docker buildx build --network=host --progress=plain -t bpfabsorb-dev .
+	docker buildx build --no-cache --network=host --progress=plain -t bpfabsorb-dev .
 
 qemu-run: 
 	docker run --privileged --rm \
