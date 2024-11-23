@@ -24,11 +24,11 @@ git submodule update --init --recursive
 
 ``` cp q-script/.config ./linux ```
 
-or
+and then,
 
 ```
 cd linux
-make defconfig
+make olddefconfig
 cd ../
 ```
 
