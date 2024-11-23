@@ -31,14 +31,6 @@ vmlinux:
 headers-install: 
 	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  make -j`nproc` headers_install
 
-modules-install: 
-	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  make -j`nproc` modules
-	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  make -j`nproc` modules_install
-
-modules-install-clean:
-	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  make -j`nproc` modules clean
-	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  make -j`nproc` modules_install clean
-
 kernel:
 	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  make -j`nproc`
 
