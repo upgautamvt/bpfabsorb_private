@@ -1,7 +1,6 @@
 FROM ubuntu:24.04 AS linux-builder
 
 ENV PATH=/linux/tools/lib/bpf/:$PATH \
-    LD_LIBRARY_PATH=/linux/tools/lib/bpf:$LD_LIBRARY_PATH \
     LINUX=/linux
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update
@@ -85,17 +84,17 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --fix-missing -y \
 
 RUN wget https://apt.llvm.org/llvm.sh
 RUN chmod +x llvm.sh
-RUN ./llvm.sh 18
-RUN ln -sf /usr/bin/clang-18 /usr/bin/clang
-RUN ln -sf /usr/bin/clang++-18 /usr/bin/clang++
-RUN ln -sf /usr/bin/ld.lld-18 /usr/bin/ld.lld
-RUN ln -sf /usr/bin/llvm-ar-18 /usr/bin/llvm-ar
-RUN ln -sf /usr/bin/llvm-strip-18 /usr/bin/llvm-strip
-RUN ln -sf /usr/bin/llvm-objdump-18 /usr/bin/llvm-objdump
-RUN ln -sf /usr/bin/llc-18 /usr/bin/llc
-RUN ln -sf /usr/bin/llvm-readelf-18 /usr/bin/llvm-readelf
-RUN ln -sf /usr/bin/llvm-dis-18 /usr/bin/llvm-dis
-RUN ln -sf /usr/bin/opt-18 /usr/bin/opt
+RUN ./llvm.sh 20
+RUN ln -sf /usr/bin/clang-20 /usr/bin/clang
+RUN ln -sf /usr/bin/clang++-20 /usr/bin/clang++
+RUN ln -sf /usr/bin/ld.lld-20 /usr/bin/ld.lld
+RUN ln -sf /usr/bin/llvm-ar-20 /usr/bin/llvm-ar
+RUN ln -sf /usr/bin/llvm-strip-20 /usr/bin/llvm-strip
+RUN ln -sf /usr/bin/llvm-objdump-20 /usr/bin/llvm-objdump
+RUN ln -sf /usr/bin/llc-20 /usr/bin/llc
+RUN ln -sf /usr/bin/llvm-readelf-20 /usr/bin/llvm-readelf
+RUN ln -sf /usr/bin/llvm-dis-20 /usr/bin/llvm-dis
+RUN ln -sf /usr/bin/opt-20 /usr/bin/opt
 
 # Qemu
 RUN DEBIAN_FRONTEND=noninteractive apt-get update

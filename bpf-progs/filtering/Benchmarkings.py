@@ -15,6 +15,7 @@ data = {
     }
 }
 
+
 # Function to generate bar graphs
 def plot_and_save_graph(metric, filename):
     labels = list(data.keys())
@@ -43,6 +44,7 @@ def plot_and_save_graph(metric, filename):
     plt.tight_layout()
     plt.savefig(filename)
     plt.close()
+
 
 # Generate graphs for TPS and Net_rate
 plot_and_save_graph('TPS', 'tps.png')

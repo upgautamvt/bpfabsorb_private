@@ -6,4 +6,8 @@
 	url = git@github.com:upgautamvt/vm2.git
 [submodule "linux"]
 	path = linux
-	url = git@github.com:upgautamvt/linux69.git
+	url = git@github.com:upgautamvt/linux.git
+        brachn = master
+[submodule "benchmarking"]
+	path = benchmarking
+	url = git@github.com:upgautamvt/benchmarking.git
