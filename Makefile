@@ -28,6 +28,9 @@ qemu-ssh:
 vmlinux: 
 	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  make -j`nproc` bzImage
 
+modules-install: 
+	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  make -j`nproc` modules
+	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  make -j`nproc` modules_install
 headers-install: 
 	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  make -j`nproc` headers_install
 
