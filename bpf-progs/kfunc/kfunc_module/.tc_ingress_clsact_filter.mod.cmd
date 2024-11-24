@@ -1,1 +1,0 @@
-savedcmd_/opt/bpfabsorb/bpf-progs/kfunc/kfunc_module/tc_ingress_clsact_filter.mod := printf '%s\n'   tc_ingress_clsact_filter.o | awk '!x[$$0]++ { print("/opt/bpfabsorb/bpf-progs/kfunc/kfunc_module/"$$0) }' > /opt/bpfabsorb/bpf-progs/kfunc/kfunc_module/tc_ingress_clsact_filter.mod

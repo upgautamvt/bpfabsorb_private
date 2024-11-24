@@ -1,1 +1,0 @@
-savedcmd_/opt/bpfabsorb/bpf-progs/kfunc/kfunc_module/Module.symvers :=  scripts/mod/modpost -M -m  -E     -o /opt/bpfabsorb/bpf-progs/kfunc/kfunc_module/Module.symvers -T /opt/bpfabsorb/bpf-progs/kfunc/kfunc_module/modules.order -i Module.symvers -e 
