@@ -7,7 +7,4 @@
 [submodule "benchmarking"]
 	path = benchmarking
 	url = git@github.com:upgautamvt/benchmarking.git
-[submodule "linux"]
-	path = linux
-	url = https://github.com/torvalds/linux.git
-	branch = master
+
