@@ -1,0 +1,6 @@
+copy the .img disk (ask Uddhav), where linux is already compiled so that
+you don't need to compile again.
+
+Note: in launch-vm<X>.bash script use your VFIO id.
+    Also use your different port if you are developing in the
+    same shared machine and someone already using your port.
