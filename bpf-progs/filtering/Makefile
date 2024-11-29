@@ -12,7 +12,7 @@ USER_CFLAGS := -I../../../linux/usr/include -I../../../linux/tools/lib/ -L../../
 all: $(KERN) $(USER)
 
 $(KERN) : %.o : %.c
-	$(BPF_CLANG) $(INCLUDE) $(BPF_CLANG_CFLAGS) -o $@ $<
+	$(BPF_CLANG) $(INCLUDE) $(CFLAGS) -o $@ $<
 
 $(USER) : % : %.c
 	gcc $(USER_CFLAGS)  $< -lbpf -o $@

@@ -15,10 +15,10 @@ USER-CFLAGS := -I../linux/usr/include -I../linux/tools/lib/ -L../linux/tools/lib
 all: $(FILES) $(USER)
 	
 test: test.c
-	$(BPF-CLANG) $(INCLUDE) $(BPF_CLANG_CFLAGS) -o test test.c
+	$(BPF-CLANG) $(INCLUDE) $(CFLAGS) -o test test.c
 
 $(FILES) : %.o : %.c
-	$(BPF-CLANG) $(INCLUDE) $(BPF_CLANG_CFLAGS) -o $@ $<
+	$(BPF-CLANG) $(INCLUDE) $(CFLAGS) -o $@ $<
 
 $(USER) : % : %.c
 	gcc $(USER-CFLAGS) $< -lbpf -o $@
@@ -26,7 +26,7 @@ $(USER) : % : %.c
 map-fine: $(MAP_FINE_OBJ) $(MAP_FINE_USER_OBJ)
 
 $(MAP_FINE_OBJ) : %.o : %.c
-	$(BPF-CLANG) $(INCLUDE) $(BPF_CLANG_CFLAGS) -o $@ $<
+	$(BPF-CLANG) $(INCLUDE) $(CFLAGS) -o $@ $<
 
 $(MAP_FINE_USER_OBJ) : % : %.c
 	gcc $(USER-CFLAGS) $< -lbpf -o $@

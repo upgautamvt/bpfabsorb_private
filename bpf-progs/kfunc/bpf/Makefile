@@ -1,25 +1,16 @@
-BPF_CLANG := clang
-BPF_CLANG_CFLAGS := -target bpf -g -Wall -O2 -c
+CLANG ?= clang
+LLVM_STRIP ?= llvm-strip
+BPF_TARGET := bpf
 
-KERNEL_DIR = ../../../linux
+CFLAGS := -O2 -g -target $(BPF_TARGET) -Wall -Werror -I/usr/include
 
-KERN_SRC := $(wildcard *.kern.c)
-KERN := $(KERN_SRC:.c=.o)
-INCLUDE := -I$(KERNEL_DIR)/usr/include -I$(KERNEL_DIR)/tools/lib/
+KERN_C_FILES := $(wildcard *.kern.c)
+OBJECTS := $(KERN_C_FILES:.kern.c=.o)
 
-USER_SRC := $(wildcard *.user.c)
-USER := $(USER_SRC:.c=)
-USER_CFLAGS := -I$(KERNEL_DIR)/usr/include -I$(KERNEL_DIR)/tools/lib/ -L$(KERNEL_DIR)/tools/lib/bpf/
+all: $(OBJECTS)
 
-all: $(KERN) $(USER)
+%.kern.o: %.kern.c
+	$(CLANG) $(CFLAGS) -c $< -o $@
 
-$(KERN) : %.o : %.c
-	$(BPF_CLANG) $(INCLUDE) $(BPF_CLANG_CFLAGS) -o $@ $<
-
-$(USER) : % : %.c
-	gcc $(USER_CFLAGS)  $< -lbpf -o $@
-
-.PHONY : clean
-
-clean :
-	rm $(KERN) $(USER)
+clean:
+	rm -f $(OBJECTS)

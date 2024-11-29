@@ -7,7 +7,7 @@ INCLUDE := -I../../linux/usr/include/ -I../../linux/tools/lib/
 all: $(FILES)
 	
 $(FILES) : %.o : %.c
-	$(BPF-CLANG) $(INCLUDE) $(BPF_CLANG_CFLAGS) -o $@ $<
+	$(BPF-CLANG) $(INCLUDE) $(CFLAGS) -o $@ $<
 
 .PHONY : clean
 

@@ -23,7 +23,7 @@ $(USER) : % : %.c
 	
 # Rule to compile BPF programs into object files
 $(FILES) : %.o : %.c
-	$(BPF-CLANG) $(INCLUDE) $(BPF_CLANG_CFLAGS) -o $@ $<
+	$(BPF-CLANG) $(INCLUDE) $(CFLAGS) -o $@ $<
 
 
 # Generate BPF skeletons for all .kern.o files
