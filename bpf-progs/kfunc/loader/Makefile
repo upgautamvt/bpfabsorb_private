@@ -5,7 +5,7 @@ BPF-CLANG := clang
 BPF_CLANG_CFLAGS := -target bpf -g -Wall -O2 -c
 
 #Your custom compiled linux source code directory
-LINUX_DIR := ../../../linux
+LINUX_DIR := ../../../linux61110
 USER-CFLAGS := -I$(LINUX_DIR)/usr/include -I$(LINUX_DIR)/tools/lib/ -L$(LINUX_DIR)/tools/lib/bpf/
 
 all: $(USER)
