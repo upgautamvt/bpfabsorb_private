@@ -57,6 +57,25 @@ static inline int landlock_restrict_self(const int ruleset_fd,
 #define ENV_TCP_CONNECT_NAME "LL_TCP_CONNECT"
 #define ENV_DELIMITER ":"
 
+static int str2num(const char *numstr, __u64 *num_dst)
+{
+	char *endptr = NULL;
+	int err = 0;
+	__u64 num;
+
+	errno = 0;
+	num = strtoull(numstr, &endptr, 10);
+	if (errno != 0)
+		err = errno;
+	/* Was the string empty, or not entirely parsed successfully? */
+	else if ((*numstr == '\0') || (*endptr != '\0'))
+		err = EINVAL;
+	else
+		*num_dst = num;
+
+	return err;
+}
+
 static int parse_path(char *env_path, const char ***const path_list)
 {
 	int i, num_paths = 0;
@@ -81,7 +100,8 @@ static int parse_path(char *env_path, const char ***const path_list)
 	LANDLOCK_ACCESS_FS_EXECUTE | \
 	LANDLOCK_ACCESS_FS_WRITE_FILE | \
 	LANDLOCK_ACCESS_FS_READ_FILE | \
-	LANDLOCK_ACCESS_FS_TRUNCATE)
+	LANDLOCK_ACCESS_FS_TRUNCATE | \
+	LANDLOCK_ACCESS_FS_IOCTL_DEV)
 
 /* clang-format on */
 
@@ -153,10 +173,9 @@ static int populate_ruleset_net(const char *const env_var, const int ruleset_fd,
 				const __u64 allowed_access)
 {
 	int ret = 1;
-	char *env_port_name, *strport;
+	char *env_port_name, *env_port_name_next, *strport;
 	struct landlock_net_port_attr net_port = {
 		.allowed_access = allowed_access,
-		.port = 0,
 	};
 
 	env_port_name = getenv(env_var);
@@ -165,8 +184,19 @@ static int populate_ruleset_net(const char *const env_var, const int ruleset_fd,
 	env_port_name = strdup(env_port_name);
 	unsetenv(env_var);
 
-	while ((strport = strsep(&env_port_name, ENV_DELIMITER))) {
-		net_port.port = atoi(strport);
+	env_port_name_next = env_port_name;
+	while ((strport = strsep(&env_port_name_next, ENV_DELIMITER))) {
+		__u64 port;
+
+		if (strcmp(strport, "") == 0)
+			continue;
+
+		if (str2num(strport, &port)) {
+			fprintf(stderr, "Failed to parse port at \"%s\"\n",
+				strport);
+			goto out_free_name;
+		}
+		net_port.port = port;
 		if (landlock_add_rule(ruleset_fd, LANDLOCK_RULE_NET_PORT,
 				      &net_port, 0)) {
 			fprintf(stderr,
@@ -201,11 +231,12 @@ out_free_name:
 	LANDLOCK_ACCESS_FS_MAKE_BLOCK | \
 	LANDLOCK_ACCESS_FS_MAKE_SYM | \
 	LANDLOCK_ACCESS_FS_REFER | \
-	LANDLOCK_ACCESS_FS_TRUNCATE)
+	LANDLOCK_ACCESS_FS_TRUNCATE | \
+	LANDLOCK_ACCESS_FS_IOCTL_DEV)
 
 /* clang-format on */
 
-#define LANDLOCK_ABI_LAST 4
+#define LANDLOCK_ABI_LAST 5
 
 int main(const int argc, char *const argv[], char *const *const envp)
 {
@@ -319,6 +350,11 @@ int main(const int argc, char *const argv[], char *const *const envp)
 		ruleset_attr.handled_access_net &=
 			~(LANDLOCK_ACCESS_NET_BIND_TCP |
 			  LANDLOCK_ACCESS_NET_CONNECT_TCP);
+		__attribute__((fallthrough));
+	case 4:
+		/* Removes LANDLOCK_ACCESS_FS_IOCTL_DEV for ABI < 5 */
+		ruleset_attr.handled_access_fs &= ~LANDLOCK_ACCESS_FS_IOCTL_DEV;
+
 		fprintf(stderr,
 			"Hint: You should update the running kernel "
 			"to leverage Landlock features "

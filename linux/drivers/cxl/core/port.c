@@ -1733,21 +1733,6 @@ static int decoder_populate_targets(struct cxl_switch_decoder *cxlsd,
 	return 0;
 }
 
-struct cxl_dport *cxl_hb_modulo(struct cxl_root_decoder *cxlrd, int pos)
-{
-	struct cxl_switch_decoder *cxlsd = &cxlrd->cxlsd;
-	struct cxl_decoder *cxld = &cxlsd->cxld;
-	int iw;
-
-	iw = cxld->interleave_ways;
-	if (dev_WARN_ONCE(&cxld->dev, iw != cxlsd->nr_targets,
-			  "misconfigured root decoder\n"))
-		return NULL;
-
-	return cxlrd->cxlsd.target[pos % iw];
-}
-EXPORT_SYMBOL_NS_GPL(cxl_hb_modulo, CXL);
-
 static struct lock_class_key cxl_decoder_key;
 
 /**
@@ -1807,7 +1792,6 @@ static int cxl_switch_decoder_init(struct cxl_port *port,
  * cxl_root_decoder_alloc - Allocate a root level decoder
  * @port: owning CXL root of this decoder
  * @nr_targets: static number of downstream targets
- * @calc_hb: which host bridge covers the n'th position by granularity
  *
  * Return: A new cxl decoder to be registered by cxl_decoder_add(). A
  * 'CXL root' decoder is one that decodes from a top-level / static platform
@@ -1815,8 +1799,7 @@ static int cxl_switch_decoder_init(struct cxl_port *port,
  * topology.
  */
 struct cxl_root_decoder *cxl_root_decoder_alloc(struct cxl_port *port,
-						unsigned int nr_targets,
-						cxl_calc_hb_fn calc_hb)
+						unsigned int nr_targets)
 {
 	struct cxl_root_decoder *cxlrd;
 	struct cxl_switch_decoder *cxlsd;
@@ -1838,7 +1821,6 @@ struct cxl_root_decoder *cxl_root_decoder_alloc(struct cxl_port *port,
 		return ERR_PTR(rc);
 	}
 
-	cxlrd->calc_hb = calc_hb;
 	mutex_init(&cxlrd->range_lock);
 
 	cxld = &cxlsd->cxld;
@@ -2082,7 +2064,7 @@ static int cxl_bus_uevent(const struct device *dev, struct kobj_uevent_env *env)
 			      cxl_device_id(dev));
 }
 
-static int cxl_bus_match(struct device *dev, struct device_driver *drv)
+static int cxl_bus_match(struct device *dev, const struct device_driver *drv)
 {
 	return cxl_device_id(dev) == to_cxl_drv(drv)->id;
 }
@@ -2106,11 +2088,18 @@ static void cxl_bus_remove(struct device *dev)
 
 static struct workqueue_struct *cxl_bus_wq;
 
+static int cxl_rescan_attach(struct device *dev, void *data)
+{
+	int rc = device_attach(dev);
+
+	dev_vdbg(dev, "rescan: %s\n", rc ? "attach" : "detached");
+
+	return 0;
+}
+
 static void cxl_bus_rescan_queue(struct work_struct *w)
 {
-	int rc = bus_rescan_devices(&cxl_bus_type);
-
-	pr_debug("CXL bus rescan result: %d\n", rc);
+	bus_for_each_dev(&cxl_bus_type, NULL, NULL, cxl_rescan_attach);
 }
 
 void cxl_bus_rescan(void)
@@ -2356,5 +2345,6 @@ static void cxl_core_exit(void)
 
 subsys_initcall(cxl_core_init);
 module_exit(cxl_core_exit);
+MODULE_DESCRIPTION("CXL: Core Compute Express Link support");
 MODULE_LICENSE("GPL v2");
 MODULE_IMPORT_NS(CXL);

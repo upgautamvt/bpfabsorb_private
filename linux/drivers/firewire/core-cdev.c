@@ -35,6 +35,7 @@
 
 
 #include "core.h"
+#include <trace/events/firewire.h>
 
 /*
  * ABI version history is documented in linux/firewire-cdev.h.
@@ -598,10 +599,10 @@ static void complete_transaction(struct fw_card *card, int rcode, u32 request_ts
 		queue_event(client, &e->event, rsp, sizeof(*rsp) + rsp->length, NULL, 0);
 
 		break;
+	}
 	default:
 		WARN_ON(1);
 		break;
-	}
 	}
 
 	/* Drop the idr's reference */
@@ -1558,6 +1559,9 @@ static void outbound_phy_packet_callback(struct fw_packet *packet,
 	struct client *e_client = e->client;
 	u32 rcode;
 
+	trace_async_phy_outbound_complete((uintptr_t)packet, card->index, status, packet->generation,
+					  packet->timestamp);
+
 	switch (status) {
 	// expected:
 	case ACK_COMPLETE:
@@ -1654,6 +1658,9 @@ static int ioctl_send_phy_packet(struct client *client, union ioctl_arg *arg)
 		pp->length = sizeof(a->data);
 		memcpy(pp->data, a->data, sizeof(a->data));
 	}
+
+	trace_async_phy_outbound_initiate((uintptr_t)&e->p, card->index, e->p.generation,
+					  e->p.header[1], e->p.header[2]);
 
 	card->driver->send_request(card, &e->p);
 

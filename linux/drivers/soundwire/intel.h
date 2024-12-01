@@ -58,6 +58,18 @@ struct sdw_intel {
 #endif
 };
 
+struct sdw_intel_prop {
+	u16 clde;
+	u16 doaise2;
+	u16 dodse2;
+	u16 clds;
+	u16 clss;
+	u16 doaise;
+	u16 doais;
+	u16 dodse;
+	u16 dods;
+};
+
 enum intel_pdi_type {
 	INTEL_PDI_IN = 0,
 	INTEL_PDI_OUT = 1,
@@ -90,6 +102,8 @@ static inline void intel_writew(void __iomem *base, int offset, u16 value)
 #define cdns_to_intel(_cdns) container_of(_cdns, struct sdw_intel, cdns)
 
 #define INTEL_MASTER_RESET_ITERATIONS	10
+
+#define SDW_INTEL_DELAYED_ENUMERATION_MS	100
 
 #define SDW_INTEL_CHECK_OPS(sdw, cb)	((sdw) && (sdw)->link_res && (sdw)->link_res->hw_ops && \
 					 (sdw)->link_res->hw_ops->cb)

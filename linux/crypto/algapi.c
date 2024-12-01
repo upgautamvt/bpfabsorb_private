@@ -396,7 +396,7 @@ found:
 	q->cra_flags |= CRYPTO_ALG_DEAD;
 	alg = test->adult;
 
-	if (list_empty(&alg->cra_list))
+	if (crypto_is_dead(alg))
 		goto complete;
 
 	if (err == -ECANCELED)
@@ -1056,6 +1056,9 @@ EXPORT_SYMBOL_GPL(crypto_type_has_alg);
 
 static void __init crypto_start_tests(void)
 {
+	if (!IS_BUILTIN(CONFIG_CRYPTO_ALGAPI))
+		return;
+
 	if (IS_ENABLED(CONFIG_CRYPTO_MANAGER_DISABLE_TESTS))
 		return;
 

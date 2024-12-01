@@ -77,7 +77,9 @@ static inline int copy_safe_from_sockptr(void *dst, size_t ksize,
 {
 	if (optlen < ksize)
 		return -EINVAL;
-	return copy_from_sockptr(dst, optval, ksize);
+	if (copy_from_sockptr(dst, optval, ksize))
+		return -EFAULT;
+	return 0;
 }
 
 static inline int copy_struct_from_sockptr(void *dst, size_t ksize,
@@ -117,9 +119,9 @@ static inline int copy_to_sockptr(sockptr_t dst, const void *src, size_t size)
 	return copy_to_sockptr_offset(dst, 0, src, size);
 }
 
-static inline void *memdup_sockptr(sockptr_t src, size_t len)
+static inline void *memdup_sockptr_noprof(sockptr_t src, size_t len)
 {
-	void *p = kmalloc_track_caller(len, GFP_USER | __GFP_NOWARN);
+	void *p = kmalloc_track_caller_noprof(len, GFP_USER | __GFP_NOWARN);
 
 	if (!p)
 		return ERR_PTR(-ENOMEM);
@@ -129,10 +131,11 @@ static inline void *memdup_sockptr(sockptr_t src, size_t len)
 	}
 	return p;
 }
+#define memdup_sockptr(...)	alloc_hooks(memdup_sockptr_noprof(__VA_ARGS__))
 
-static inline void *memdup_sockptr_nul(sockptr_t src, size_t len)
+static inline void *memdup_sockptr_nul_noprof(sockptr_t src, size_t len)
 {
-	char *p = kmalloc_track_caller(len + 1, GFP_KERNEL);
+	char *p = kmalloc_track_caller_noprof(len + 1, GFP_KERNEL);
 
 	if (!p)
 		return ERR_PTR(-ENOMEM);
@@ -143,6 +146,7 @@ static inline void *memdup_sockptr_nul(sockptr_t src, size_t len)
 	p[len] = '\0';
 	return p;
 }
+#define memdup_sockptr_nul(...)	alloc_hooks(memdup_sockptr_nul_noprof(__VA_ARGS__))
 
 static inline long strncpy_from_sockptr(char *dst, sockptr_t src, size_t count)
 {
