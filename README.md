@@ -48,11 +48,9 @@ sudo reboot
 
 ## Docker Environment,
 
-```cmake
 make vmlinux
 make qemu-run
 make qemu-ssh
-```
 
 ## To QEMU gdb debugging
 cmake```
@@ -60,7 +58,7 @@ cd linux
 gdb vmlinux
 target remote:1234
 c
-```
+
 then set your breakpoints and debug more
 
 
