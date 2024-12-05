@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
     uint8_t message[256];
     struct dropme_foo_t *foo_p;
 
+    int total_requests = 0;
     if (argc != 3) {
 	    printf("Failed need args\n");
 	    return -1;
@@ -86,8 +87,6 @@ int main(int argc, char *argv[]) {
 		    printf("rec err\n");
 		    continue;
 	    }
-	    printf("bytes was %d\n", bytes);
-
 
     	    foo_p = dropme_foo_new(&workspace[0], sizeof(workspace));
 	   
@@ -98,7 +97,9 @@ int main(int argc, char *argv[]) {
 	    int s = *message;
    	    size = dropme_foo_decode(foo_p, (message + 4), s);
 	    printf("Got request for name %s\n", foo_p->name_p);
+	    total_requests++;
 	    close(new_fd);
+    		printf("Total requests was %d\n", total_requests);
     }
     close(sock);
     return 0;

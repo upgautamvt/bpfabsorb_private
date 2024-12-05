@@ -33,13 +33,11 @@ __bpf_kfunc int kfunc_tc_ingress_clsact_filter(struct sk_buff *skb, u32 skb__sz)
     struct dropme_foo_t *foo_p;
     void * payload = data + sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct udphdr);
     u32 len = *(u32 *)payload;
-    printk(KERN_INFO "len is %u\n", len);
     
     // turn encoded into data of the packet
     foo_p = dropme_foo_new(&workspace[0], sizeof(workspace));
     len = dropme_foo_decode(foo_p, data + sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(struct udphdr) + sizeof(u32), len);
 
-    printk(KERN_INFO "drop is %d\n", foo_p->drop);
     if (foo_p->drop == 1) {
         return -1;
     }

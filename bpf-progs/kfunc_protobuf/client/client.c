@@ -45,6 +45,7 @@ int main(int argc, char *argv[]) {
         close(sock);
         return -1;
     }
+    for (int i = 0; i < 20; i++) {
     // Encode (using your existing encoding logic)
     foo_p = dropme_foo_new(&workspace[0], sizeof(workspace));
     if (foo_p == NULL) {
@@ -52,7 +53,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     foo_p->drop = 3;
-    foo_p->name_p = "uddhav";
+    foo_p->name_p = "GOOD";
     size = dropme_foo_encode(foo_p, &encoded[0], sizeof(encoded));
     if (size < 0) {
         close(sock);
@@ -73,13 +74,13 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     foo_p->drop = 1;
-    foo_p->name_p = "uddhav";
+    foo_p->name_p = "BAD";
     size = dropme_foo_encode(foo_p, &encoded[0], sizeof(encoded));
     if (size < 0) {
         close(sock);
         return 2;
     }
-    printf("Successfully encoded Foo into %d bytes.\n", size);
+    //printf("Successfully encoded Foo into %d bytes.\n", size);
     //4 bytes size = this is length of encoded message
     //remaining is encoded message
     memcpy(modified_encoded, encoded, 4);               // Copy first 4 bytes
@@ -87,6 +88,7 @@ int main(int argc, char *argv[]) {
     if (send_payload(sock, modified_encoded, size+4, &server_addr) != 0) {
         close(sock);
         return 3;
+    }
     }
     close(sock);
     return 0;
