@@ -1,0 +1,1 @@
+savedcmd_/linux-dev-env/modules/kfunc_module_tc_ingress.mod := printf '%s\n'   kfunc_module_tc_ingress.o | awk '!x[$$0]++ { print("/linux-dev-env/modules/"$$0) }' > /linux-dev-env/modules/kfunc_module_tc_ingress.mod

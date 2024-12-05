@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package dropme;
+
+message Foo {
+    string name = 1;
+    int32 drop = 2;
+}

@@ -1,0 +1,15 @@
+Now, trigger the whole logic
+tc qdisc add dev <nic> clsact //attach clsact qdisc to eth0
+tc filter add dev <nic> ingress bpf da obj ./<bpf_program>.kern.o sec tc/ingress //add bpf filter program to eth0 in da mode
+
+
+Now, trigger the whole logic
+tc qdisc add dev eth0 clsact
+tc filter add dev eth0 ingress bpf da obj ./dummy.kern.o sec tc/ingress
+
+
+root@q:/bpfabsorb/bpf-progs/kfunc_tc_ingress/bpf# tc filter add dev eth0 ingress bpf da obj ./dummy.kern.o sec tc/ingress
+root@q:/bpfabsorb/bpf-progs/kfunc_tc_ingress/bpf# tc filter add dev eth0 ingress bpf da obj ./dummy.kern.o sec tc/ingres
+root@q:/bpfabsorb/bpf-progs/kfunc_tc_ingress/bpf# bpftool prog show | grep kfunc_firewall
+4: sched_cls  name kfunc_firewall  tag 337ffbc09f5a9694  gpl
+root@q:/bpfabsorb/bpf-progs/kfunc_tc_ingress/bpf# 
