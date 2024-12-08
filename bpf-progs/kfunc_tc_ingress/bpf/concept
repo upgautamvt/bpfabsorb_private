@@ -1,4 +1,4 @@
-Now, trigger the whole logic
-tc qdisc add dev <nic> clsact //attach clsact qdisc to eth0
-tc filter add dev <nic> ingress bpf da obj ./<bpf_program>.kern.o sec tc/ingress //add bpf filter program to eth0 in da mode
+Trigger
+tc qdisc add dev <nic> clsact
+tc filter add dev <nic> ingress bpf da obj ./<bpf_program>.kern.o sec tc/ingress
 

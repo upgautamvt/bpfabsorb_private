@@ -27,6 +27,12 @@ qemu-ssh:
 
 vmlinux: 
 	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  make -j`nproc` bzImage
+	
+disable-security: 
+	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  scripts/config --disable SYSTEM_TRUSTED_KEYS
+	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  scripts/config --disable SYSTEM_REVOCATION_KEYS
+	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
+	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  scripts/config --set-str CONFIG_SYSTEM_REVOCATION_KEYS ""
 
 modules-install: 
 	docker run --rm -v ${LINUX}:/linux -w /linux bpfabsorb-dev  make -j`nproc` modules
