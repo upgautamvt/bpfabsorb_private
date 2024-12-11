@@ -1,0 +1,10 @@
+obj-m += kfunc_module_tc_ingress.o  # kfunc_module_tc_ingress.o is the target
+
+# Enable BTF generation
+KBUILD_CFLAGS += -g -O2
+
+all:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+
+clean:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean

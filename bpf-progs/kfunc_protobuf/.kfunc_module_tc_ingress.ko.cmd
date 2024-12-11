@@ -1,0 +1,1 @@
+savedcmd_/linux-dev-env/modules/kfunc_module_tc_ingress.ko := ld -r -m elf_x86_64 -z noexecstack --no-warn-rwx-segments --build-id=sha1  -T scripts/module.lds -o /linux-dev-env/modules/kfunc_module_tc_ingress.ko /linux-dev-env/modules/kfunc_module_tc_ingress.o /linux-dev-env/modules/kfunc_module_tc_ingress.mod.o
